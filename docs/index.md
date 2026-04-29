@@ -1,4 +1,4 @@
 # Gestor de Ferramentas CNC
 
  - [Cronograma do projeto](cronograma-projeto.md)
- - [teste](novo.md)
+ - [teste2](novo.md)
