@@ -1,13 +1,13 @@
 # CRONOGRAMA DO PROJETO
 
-## Gestor de Ferramentas CNC
+## teste
 
 ---
 
 ## Informações do Projeto
 
 **Nome do Projeto:**
-Gestor de Ferramentas CNC
+TESTE
 
 **Problema que resolve:**
 Resolve a falta de controle sobre a disponibilidade, uso e desgaste das ferramentas em centros de usinagem CNC, evitando atrasos na produção, interrupções em projetos e custos com compras emergenciais.
