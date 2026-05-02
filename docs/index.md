@@ -1,4 +1,3 @@
 # Gestor de Ferramentas CNC
 
- - [Cronograma do projeto](cronograma-projeto.md)
- - [teste2](novo.md)
+ - [Atividade 2 Modelos de Processo e Planejamento](Atividade 2.md)
