@@ -63,9 +63,6 @@ ID	Funcionalidade	Rota	Método	Descrição
 5	Alertas de desgaste	/alertas	GET	Gera alertas de desgaste
 6	Histórico de uso	/historico	GET	Consulta histórico
 7	Dashboard	/dashboard	GET	Exibe dados gerais
-
-
-
 Cronograma
 Semana	Atividade
 1	Planejamento e levantamento de requisitos
@@ -92,6 +89,8 @@ Node.js (backend)
 Banco de dados (a definir)
 Considerações
 
-O planejamento do projeto foi estruturado utilizando o método Kanban, permitindo maior flexibilidade e controle visual das tarefas. A divisão clara das responsabilidades e o uso de ferramentas adequadas contribuem para um desenvolvimento organizado e eficiente.
+O planejamento do projeto foi estruturado utilizando o método Kanban, permitindo maior flexibilidade e controle visual das tarefas.
+
+A divisão clara das responsabilidades e o uso de ferramentas adequadas contribuem para um desenvolvimento organizado e eficiente.
 
 A abordagem adotada possibilita entregas contínuas e adaptação às necessidades do projeto, garantindo maior qualidade no sistema final.
