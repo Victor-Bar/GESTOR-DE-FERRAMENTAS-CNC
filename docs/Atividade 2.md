@@ -62,6 +62,7 @@ ID	Funcionalidade	Rota	JSON
 5	Alertas de desgaste	/alertas	json { "nome": "Alertas", "descricao": "Gera alertas de desgaste", "metodo": "GET" }
 6	Histórico de uso	/historico	json { "nome": "Histórico", "descricao": "Consulta histórico", "metodo": "GET" }
 7	Dashboard	/dashboard	json { "nome": "Dashboard", "descricao": "Exibe dados gerais", "metodo": "GET" }
+
 🔹 Cronograma
 Semana	Atividade
 1	Planejamento e levantamento de requisitos
@@ -73,7 +74,7 @@ Semana	Atividade
 7	Ajustes finais
 8	Implantação (Go-live)
 
-📎 Cronograma detalhado (macro):
+🔹 Cronograma detalhado (macro):
 
 https://docs.google.com/spreadsheets/d/1izJ749c1uSKwr5gvbJumcjf_3Sx1yBnrmphSZTtz6DQ/edit?usp=sharing
 
@@ -84,6 +85,7 @@ Outros:
 Figma (protótipos)
 Node.js (backend)
 Banco de dados (a definir)
+
 🔹 Considerações
 
 O planejamento do projeto foi estruturado utilizando o método Kanban, permitindo maior flexibilidade e controle visual das tarefas. A divisão clara das responsabilidades e o uso de ferramentas adequadas contribuem para um desenvolvimento organizado e eficiente.
