@@ -58,33 +58,8 @@ Descreva os principais casos:
 
 ## DER (Diagrama Entidade-Relacionamento)
 
-![DER](assets/der.png) 
-![DER](der.png)
-
-![DER](./der.png)
-
-![DER](/der.png)
-
-![DER](assets/der.png)
-
-![DER](./assets/der.png)
-
-![DER](img/der.png)
-
-![DER](./img/der.png)
-
-<img src="der.png">
-
-<img src="./der.png">
-
-<img src="assets/der.png">
-
-<img src="./assets/der.png">
-
-<img width="1000" src="der.png">
-
 <img width="1000" src="./der.png">
-
+- link der: https://dbdiagram.io/d/69ff8a1454a51d93d3ddc442
 ---
 
 ## Regras de Negócio
