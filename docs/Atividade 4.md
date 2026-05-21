@@ -103,8 +103,8 @@ Funcionamento:
 
 ## Diagrama de Classes
 
+<img width="1000" src="./diagrama-classes.jpg">
 
-![Diagrama de Classes](images/diagrama-classes.png)
 
 
 ---
@@ -114,17 +114,20 @@ Funcionamento:
 
 
 ### Dashboard Principal
-<img width="1000" src="./dashboard.png">
+
 <img width="1000" src="./dashboard.jpg">
 
 ### Gestão de Ferramentas
-![Gestão de Ferramentas](images/gestao-ferramentas.jpg)
+<img width="1000" src="./gestao-ferramentas.jpg">
+
 
 ###  de Ferramenta Quebrada
-![Ferramenta Quebrada](images/ferramenta-quebrada.jpg)
+<img width="1000" src="./ferramenta-quebrada.jpg">
+
 
 ### Histórico de Ferramentas registrada e Quebradas
-![Histórico](images/historico-quebradas.jpg)
+<img width="1000" src="./historico-quebradas.jpg">
+
 
 ---
 
