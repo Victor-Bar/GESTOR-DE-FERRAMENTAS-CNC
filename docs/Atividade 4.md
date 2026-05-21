@@ -114,7 +114,8 @@ Funcionamento:
 
 
 ### Dashboard Principal
-![Dashboard](images/dashboard.jpg)
+<img width="1000" src="./dashboard.png">
+<img width="1000" src="./dashboard.jpg">
 
 ### Gestão de Ferramentas
 ![Gestão de Ferramentas](images/gestao-ferramentas.jpg)
