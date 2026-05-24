@@ -61,7 +61,7 @@ Descrição:
 - JavaScript
 
 ### Banco de Dados
-- JSON local
+- Postgresql
 
 ### Outros
 - Git
