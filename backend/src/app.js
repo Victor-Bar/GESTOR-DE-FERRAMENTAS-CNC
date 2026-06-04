@@ -8,12 +8,12 @@ const app = express();
 app.use(cors());          // permite requisições de outros domínios (frontend)
 app.use(express.json());  // transforma o body JSON em objeto JavaScript
 
-// Rotas (serão descomentadas conforme forem criadas)
-// const authRoutes = require('./routes/auth.routes');
-// app.use('/auth', authRoutes);
+// Rotas
+const authRoutes = require('./routes/auth.routes');
+app.use('/auth', authRoutes);
 
 // Middleware de erros — SEMPRE por último
-// const errorHandler = require('./middleware/errorHandler');
-// app.use(errorHandler);
+const errorHandler = require('./middleware/errorHandler');
+app.use(errorHandler);
 
 module.exports = app;
