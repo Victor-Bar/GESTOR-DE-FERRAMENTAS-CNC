@@ -23,3 +23,8 @@ pids
 # OS files
 .DS_Store
 Thumbs.db
+
+# Documentos internos de planejamento
+docs/Analise-Implementacao-Guia-Completo.md
+docs/Plano-3-Dias-Implementacao.md
+docs/Atividade 5 - Plano de Implementação.md

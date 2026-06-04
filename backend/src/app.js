@@ -1,11 +1,19 @@
-const express = require('express')
+const express = require('express');
+const cors = require('cors');
+require('dotenv').config();
 
-const toolRoutes = require('./routes/tool.routes')
+const app = express();
 
-const app = express()
+// Middlewares globais — executados em toda requisição
+app.use(cors());          // permite requisições de outros domínios (frontend)
+app.use(express.json());  // transforma o body JSON em objeto JavaScript
 
-app.use(express.json())
+// Rotas (serão descomentadas conforme forem criadas)
+// const authRoutes = require('./routes/auth.routes');
+// app.use('/auth', authRoutes);
 
-app.use('/tools', toolRoutes)
+// Middleware de erros — SEMPRE por último
+// const errorHandler = require('./middleware/errorHandler');
+// app.use(errorHandler);
 
-module.exports = app
+module.exports = app;
