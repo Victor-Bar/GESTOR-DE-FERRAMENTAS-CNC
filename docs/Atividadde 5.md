@@ -156,3 +156,132 @@ Fluxo:
 
 ---
 
+# 6. Banco de Dados
+
+**SGBD:** MySQL
+
+## Tabela usuarios
+
+| Campo | Tipo |
+|---------|---------|
+| id | INT |
+| nome | VARCHAR |
+| email | VARCHAR |
+| senha | VARCHAR |
+| tipo | VARCHAR |
+
+## Tabela ferramentas
+
+| Campo | Tipo |
+|---------|---------|
+| id | INT |
+| tipo | VARCHAR |
+| diametro | DECIMAL |
+| comprimento | DECIMAL |
+| material | VARCHAR |
+| quantidade | INT |
+
+## Tabela ferramentas_quebradas
+
+| Campo | Tipo |
+|---------|---------|
+| id | INT |
+| ferramenta_id | INT |
+| quantidade | INT |
+
+---
+
+# 7. Autenticação
+
+## Fluxo
+
+1. Cliente envia:
+
+POST /auth/login
+
+2. Sistema valida e-mail e senha.
+
+3. JWT é gerado contendo:
+
+- id
+- nome
+- email
+- tipo
+
+4. Token retorna para o cliente.
+
+5. Cliente envia:
+
+Authorization: Bearer <token>
+
+6. Middleware `express-jwt` valida o token.
+
+7. Middlewares de permissão verificam o perfil do usuário.
+
+---
+
+# 8. Testes Realizados
+
+## Autenticação
+
+- Login válido.
+- Login inválido.
+- Acesso sem token.
+- Token expirado.
+
+## Ferramentas
+
+- Listagem.
+- Busca por ID.
+- Cadastro.
+- Atualização.
+- Exclusão.
+- Alertas de estoque.
+- Registro de quebra.
+
+## Usuários
+
+- CRUD completo.
+- Teste de permissões.
+
+---
+
+# 9. Dificuldades Encontradas
+
+## Ordem das Rotas
+
+A rota:
+
+GET /ferramentas/alertas
+
+precisou ser declarada antes de:
+
+GET /ferramentas/:id
+
+para evitar conflito de interpretação pelo Express.
+
+---
+
+## Middleware express-jwt
+
+Foi necessário configurar manualmente:
+
+- getToken()
+- requestProperty
+
+para utilização do objeto `req.auth`.
+
+---
+
+# 10. Considerações Finais
+
+O projeto Gestor CNC foi desenvolvido com sucesso, atendendo aos requisitos de autenticação, controle de acesso, CRUDs, integração com banco de dados e tratamento de erros.
+
+Além dos requisitos mínimos, foram implementadas funcionalidades adicionais como:
+
+- Controle de estoque.
+- Alertas automáticos.
+- Registro de ferramentas quebradas.
+- Controle de permissões por perfil.
+
+
