@@ -5,154 +5,48 @@ const router = express.Router();
 const connection = require('../database/connection');
 const { protegerRota } = require('../middleware/auth');
 const { apenasEngenheiroOuAdministrador} = require('../middleware/permissoes');
+const controller =require('../controllers/ferramentasController');
 
 
 
 
 // LISTAR TODAS AS FERRAMENTAS
 
-router.get('/', protegerRota, (req, res) => {
-
-    const sql = 'SELECT * FROM ferramentas';
-
-    connection.query(sql, (erro, resultados) => {
-
-        if (erro) {
-            return res.status(500).json({
-                erro: 'Erro ao buscar ferramentas'
-            });
-        }
-
-        res.status(200).json(resultados);
-
-    });
-
-});
+router.get(
+    '/',
+    protegerRota,
+    controller.listar
+);
 
 
 
 // ALERTAS (IMPORTANTE: ANTES DO /:id)
 
-router.get('/alertas', protegerRota, (req, res) => {
-
-    const sql = `
-        SELECT *
-        FROM ferramentas
-        WHERE quantidade <= 3
-        ORDER BY quantidade ASC
-    `;
-
-    connection.query(sql, (erro, resultados) => {
-
-        if (erro) {
-            return res.status(500).json({
-                erro: 'Erro ao buscar alertas'
-            });
-        }
-
-        const alertas = resultados.map(f => {
-
-            let nivel = 'OK';
-
-            if (f.quantidade === 0) {
-                nivel = 'CRÍTICO';
-            } else if (f.quantidade <= 2) {
-                nivel = 'ALTO';
-            } else if (f.quantidade <= 3) {
-                nivel = 'BAIXO';
-            }
-
-            return {
-                ...f,
-                nivel_alerta: nivel
-            };
-        });
-
-        res.json({
-            total_alertas: alertas.length,
-            ferramentas: alertas
-        });
-
-    });
-
-});
-
+router.get(
+    '/alertas',
+    protegerRota,
+    controller.alertas
+);
 
 
 // BUSCAR POR ID
 
-router.get('/:id', protegerRota, (req, res) => {
-
-    const id = req.params.id;
-
-    const sql = 'SELECT * FROM ferramentas WHERE id = ?';
-
-    connection.query(sql, [id], (erro, resultados) => {
-
-        if (erro) {
-            return res.status(500).json({
-                erro: 'Erro ao buscar ferramenta'
-            });
-        }
-
-        if (resultados.length === 0) {
-            return res.status(404).json({
-                erro: 'Ferramenta não encontrada'
-            });
-        }
-
-        res.status(200).json(resultados[0]);
-
-    });
-
-});
+router.get(
+    '/:id',
+    protegerRota,
+    controller.buscarPorId
+);
 
 
 
 // CADASTRAR
 
-router.post('/', protegerRota, apenasEngenheiroOuAdministrador, (req, res) => {
-
-    const {
-        tipo,
-        diametro,
-        comprimento,
-        material,
-        quantidade
-    } = req.body;
-
-    if (!tipo || !diametro || !comprimento || !material || !quantidade) {
-        return res.status(400).json({
-            erro: 'Preencha todos os campos'
-        });
-    }
-
-    const sql = `
-        INSERT INTO ferramentas
-        (tipo, diametro, comprimento, material, quantidade)
-        VALUES (?, ?, ?, ?, ?)
-    `;
-
-    connection.query(sql,
-        [tipo, diametro, comprimento, material, quantidade],
-        (erro, resultado) => {
-
-            if (erro) {
-                return res.status(500).json({
-                    erro: 'Erro ao inserir ferramenta'
-                });
-            }
-
-            res.status(201).json({
-                mensagem: 'Ferramenta cadastrada com sucesso',
-                idInserido: resultado.insertId
-            });
-
-        }
-    );
-
-});
-
+router.post(
+    '/',
+    protegerRota,
+    apenasEngenheiroOuAdministrador,
+    controller.cadastrar
+);
 
 
 // ATUALIZAR
