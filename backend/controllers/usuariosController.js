@@ -1,11 +1,8 @@
-const connection = require('../database/connection');
-
+const usuariosService = require('../services/usuariosService');
 
 exports.listar = (req, res) => {
 
-    const sql = 'SELECT id, nome, email, tipo FROM usuarios';
-
-    connection.query(sql, (erro, resultados) => {
+    usuariosService.listar((erro, resultados) => {
 
         if (erro) {
             return res.status(500).json({
@@ -23,13 +20,7 @@ exports.buscarPorId = (req, res) => {
 
     const id = req.params.id;
 
-    const sql = `
-        SELECT id, nome, email, tipo
-        FROM usuarios
-        WHERE id = ?
-    `;
-
-    connection.query(sql, [id], (erro, resultados) => {
+    usuariosService.buscarPorId(id, (erro, resultados) => {
 
         if (erro) {
             return res.status(500).json({
@@ -64,15 +55,11 @@ exports.cadastrar = (req, res) => {
         });
     }
 
-    const sql = `
-        INSERT INTO usuarios
-        (nome, email, senha, tipo)
-        VALUES (?, ?, ?, ?)
-    `;
-
-    connection.query(
-        sql,
-        [nome, email, senha, tipo],
+    usuariosService.cadastrar(
+        nome,
+        email,
+        senha,
+        tipo,
         (erro, resultado) => {
 
             if (erro) {
@@ -102,25 +89,12 @@ exports.atualizar = (req, res) => {
         tipo
     } = req.body;
 
-    const sql = `
-        UPDATE usuarios
-        SET
-            nome = ?,
-            email = ?,
-            senha = ?,
-            tipo = ?
-        WHERE id = ?
-    `;
-
-    connection.query(
-        sql,
-        [
-            nome,
-            email,
-            senha,
-            tipo,
-            id
-        ],
+    usuariosService.atualizar(
+        nome,
+        email,
+        senha,
+        tipo,
+        id,
         (erro) => {
 
             if (erro) {
@@ -142,9 +116,7 @@ exports.excluir = (req, res) => {
 
     const id = req.params.id;
 
-    const sql = 'DELETE FROM usuarios WHERE id = ?';
-
-    connection.query(sql, [id], (erro) => {
+    usuariosService.excluir(id, (erro) => {
 
         if (erro) {
             return res.status(500).json({
