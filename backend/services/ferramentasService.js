@@ -1,31 +1,17 @@
-const connection = require('../database/connection');
+const ferramentaModel = require('../models/ferramentaModel');
 
 exports.listar = (callback) => {
-
-    const sql = 'SELECT * FROM ferramentas';
-
-    connection.query(sql, callback);
-
+    ferramentaModel.listar(callback);
 };
+
 exports.buscarAlertas = (callback) => {
-
-    const sql = `
-        SELECT *
-        FROM ferramentas
-        WHERE quantidade <= 3
-        ORDER BY quantidade ASC
-    `;
-
-    connection.query(sql, callback);
-
+    ferramentaModel.buscarAlertas(callback);
 };
+
 exports.buscarPorId = (id, callback) => {
-
-    const sql = 'SELECT * FROM ferramentas WHERE id = ?';
-
-    connection.query(sql, [id], callback);
-
+    ferramentaModel.buscarPorId(id, callback);
 };
+
 exports.cadastrar = (
     tipo,
     diametro,
@@ -34,26 +20,16 @@ exports.cadastrar = (
     quantidade,
     callback
 ) => {
-
-    const sql = `
-        INSERT INTO ferramentas
-        (tipo, diametro, comprimento, material, quantidade)
-        VALUES (?, ?, ?, ?, ?)
-    `;
-
-    connection.query(
-        sql,
-        [
-            tipo,
-            diametro,
-            comprimento,
-            material,
-            quantidade
-        ],
+    ferramentaModel.cadastrar(
+        tipo,
+        diametro,
+        comprimento,
+        material,
+        quantidade,
         callback
     );
-
 };
+
 exports.atualizar = (
     tipo,
     diametro,
@@ -63,47 +39,25 @@ exports.atualizar = (
     id,
     callback
 ) => {
-
-    const sql = `
-        UPDATE ferramentas
-        SET tipo = ?, diametro = ?, comprimento = ?, material = ?, quantidade = ?
-        WHERE id = ?
-    `;
-
-    connection.query(
-        sql,
-        [tipo, diametro, comprimento, material, quantidade, id],
+    ferramentaModel.atualizar(
+        tipo,
+        diametro,
+        comprimento,
+        material,
+        quantidade,
+        id,
         callback
     );
-
 };
+
 exports.excluir = (id, callback) => {
-
-    const sql = 'DELETE FROM ferramentas WHERE id = ?';
-
-    connection.query(sql, [id], callback);
-
+    ferramentaModel.excluir(id, callback);
 };
+
 exports.atualizarQuantidade = (novaQtd, id, callback) => {
-
-    const sql = `
-        UPDATE ferramentas
-        SET quantidade = ?
-        WHERE id = ?
-    `;
-
-    connection.query(sql, [novaQtd, id], callback);
-
+    ferramentaModel.atualizarQuantidade(novaQtd, id, callback);
 };
 
 exports.registrarQuebra = (id, quantidade, callback) => {
-
-    const sql = `
-        INSERT INTO ferramentas_quebradas
-        (ferramenta_id, quantidade)
-        VALUES (?, ?)
-    `;
-
-    connection.query(sql, [id, quantidade], callback);
-
+    ferramentaModel.registrarQuebra(id, quantidade, callback);
 };
