@@ -1,10 +1,9 @@
+const ferramentasService = require('../services/ferramentasService');
 const connection = require('../database/connection');
 
 exports.listar = (req, res) => {
 
-    const sql = 'SELECT * FROM ferramentas';
-
-    connection.query(sql, (erro, resultados) => {
+    ferramentasService.listar((erro, resultados) => {
 
         if (erro) {
             return res.status(500).json({
@@ -19,15 +18,7 @@ exports.listar = (req, res) => {
 };
 
 exports.alertas = (req, res) => {
-
-    const sql = `
-        SELECT *
-        FROM ferramentas
-        WHERE quantidade <= 3
-        ORDER BY quantidade ASC
-    `;
-
-    connection.query(sql, (erro, resultados) => {
+    ferramentasService.buscarAlertas((erro, resultados) => {
 
         if (erro) {
             return res.status(500).json({
@@ -66,9 +57,7 @@ exports.buscarPorId = (req, res) => {
 
     const id = req.params.id;
 
-    const sql = 'SELECT * FROM ferramentas WHERE id = ?';
-
-    connection.query(sql, [id], (erro, resultados) => {
+   ferramentasService.buscarPorId(id, (erro, resultados) => {
 
         if (erro) {
             return res.status(500).json({
@@ -87,7 +76,7 @@ exports.buscarPorId = (req, res) => {
     });
     };
 
-    exports.cadastrar = (req, res) => {
+exports.cadastrar = (req, res) => {
 
     const {
         tipo,
@@ -103,15 +92,12 @@ exports.buscarPorId = (req, res) => {
         });
     }
 
-    const sql = `
-        INSERT INTO ferramentas
-        (tipo, diametro, comprimento, material, quantidade)
-        VALUES (?, ?, ?, ?, ?)
-    `;
-
-    connection.query(
-        sql,
-        [tipo, diametro, comprimento, material, quantidade],
+    ferramentasService.cadastrar(
+        tipo,
+        diametro,
+        comprimento,
+        material,
+        quantidade,
         (erro, resultado) => {
 
             if (erro) {
@@ -127,6 +113,7 @@ exports.buscarPorId = (req, res) => {
 
         }
     );
+
 };
 exports.atualizar = (req, res) => {
 
@@ -146,15 +133,13 @@ exports.atualizar = (req, res) => {
         });
     }
 
-    const sql = `
-        UPDATE ferramentas
-        SET tipo = ?, diametro = ?, comprimento = ?, material = ?, quantidade = ?
-        WHERE id = ?
-    `;
-
-    connection.query(
-        sql,
-        [tipo, diametro, comprimento, material, quantidade, id],
+    ferramentasService.atualizar(
+        tipo,
+        diametro,
+        comprimento,
+        material,
+        quantidade,
+        id,
         (erro) => {
 
             if (erro) {
@@ -175,9 +160,7 @@ exports.excluir = (req, res) => {
 
     const id = req.params.id;
 
-    const sql = 'DELETE FROM ferramentas WHERE id = ?';
-
-    connection.query(sql, [id], (erro) => {
+    ferramentasService.excluir(id, (erro) => {
 
         if (erro) {
 
@@ -207,9 +190,7 @@ exports.quebrar = (req, res) => {
         });
     }
 
-    const sqlBusca = 'SELECT * FROM ferramentas WHERE id = ?';
-
-    connection.query(sqlBusca, [id], (erro, resultados) => {
+    ferramentasService.buscarPorId(id, (erro, resultados) => {
 
         if (erro) {
             return res.status(500).json({
@@ -233,13 +214,7 @@ exports.quebrar = (req, res) => {
 
         const novaQtd = ferramenta.quantidade - quantidade;
 
-        const sqlUpdate = `
-            UPDATE ferramentas
-            SET quantidade = ?
-            WHERE id = ?
-        `;
-
-        connection.query(sqlUpdate, [novaQtd, id], (erro2) => {
+        ferramentasService.atualizarQuantidade(novaQtd, id, (erro2) => {
 
             if (erro2) {
                 return res.status(500).json({
@@ -247,19 +222,21 @@ exports.quebrar = (req, res) => {
                 });
             }
 
-            const sqlInsert = `
-                INSERT INTO ferramentas_quebradas
-                (ferramenta_id, quantidade)
-                VALUES (?, ?)
-            `;
+            ferramentasService.registrarQuebra(id, quantidade, (erro3) => {
 
-            connection.query(sqlInsert, [id, quantidade]);
+                if (erro3) {
+                    return res.status(500).json({
+                        erro: 'Erro ao registrar quebra'
+                    });
+                }
 
-            return res.json({
-                mensagem: 'Ferramenta registrada como quebrada',
-                ferramenta_id: id,
-                quantidade_quebrada: quantidade,
-                estoque_atual: novaQtd
+                return res.json({
+                    mensagem: 'Ferramenta registrada como quebrada',
+                    ferramenta_id: id,
+                    quantidade_quebrada: quantidade,
+                    estoque_atual: novaQtd
+                });
+
             });
 
         });
@@ -267,4 +244,3 @@ exports.quebrar = (req, res) => {
     });
 
 };
-
