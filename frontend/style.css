@@ -1,0 +1,211 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background: #eef1f5;
+    color: #222;
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* LOGIN */
+
+.container {
+    width: 100%;
+    min-height: 100vh;
+}
+
+#loginBox {
+    width: 420px;
+    margin: 120px auto;
+}
+
+#loginBox h1 {
+    color: #1f2937;
+}
+
+#loginMsg {
+    margin-top: 10px;
+    color: red;
+}
+
+/* LAYOUT PRINCIPAL */
+
+#sistemaBox {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    min-height: 100vh;
+}
+
+.sidebar {
+    background: #1f2937;
+    color: white;
+    padding: 20px;
+}
+
+.sidebar h2 {
+    margin-bottom: 25px;
+    font-size: 20px;
+}
+
+.sidebar button {
+    width: 100%;
+    margin-bottom: 10px;
+    background: #374151;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    text-align: left;
+}
+
+.sidebar button:hover {
+    background: #4b5563;
+}
+
+.main {
+    padding: 25px;
+}
+
+header {
+    background: white;
+    padding: 18px 22px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* CARDS */
+
+.card {
+    background: white;
+    padding: 20px;
+    margin-bottom: 20px;
+    border-radius: 10px;
+    border: 1px solid #ddd;
+}
+
+.card h2 {
+    margin-bottom: 15px;
+    color: #111827;
+}
+
+.card h3 {
+    margin: 15px 0 10px;
+}
+
+/* FORMULÁRIOS */
+
+input,
+select {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+
+    border: 1px solid #ccc;
+    border-radius: 6px;
+}
+
+button {
+    padding: 10px 15px;
+    cursor: pointer;
+
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    background: #f3f4f6;
+}
+
+button:hover {
+    background: #e5e7eb;
+}
+
+hr {
+    margin: 18px 0;
+}
+
+/* LISTAS */
+
+.item {
+    border-bottom: 1px solid #ddd;
+    padding: 12px 0;
+}
+
+.item:last-child {
+    border-bottom: none;
+}
+
+/* DASHBOARD */
+
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.dashboard-card {
+    background: white;
+    padding: 18px;
+    border-radius: 10px;
+    border: 1px solid #ddd;
+}
+
+.dashboard-card h3 {
+    font-size: 16px;
+    margin-bottom: 8px;
+}
+
+.dashboard-card strong {
+    font-size: 28px;
+}
+
+.alerta-critico {
+    border-left: 6px solid red;
+}
+
+.alerta-alto {
+    border-left: 6px solid orange;
+}
+
+.alerta-baixo {
+    border-left: 6px solid #facc15;
+}
+
+/* SEÇÕES */
+
+.tela {
+    display: none;
+}
+
+.tela.ativa {
+    display: block;
+}
+
+/* RESPONSIVO */
+
+@media (max-width: 800px) {
+    #sistemaBox {
+        grid-template-columns: 1fr;
+    }
+
+    .sidebar {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+
+    #loginBox {
+        width: 90%;
+    }
+}

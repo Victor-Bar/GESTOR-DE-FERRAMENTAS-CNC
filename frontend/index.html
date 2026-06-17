@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Gestor CNC</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div class="container">
+
+    <section id="loginBox" class="card">
+      <h1>Gestor CNC</h1>
+      <h2>Login</h2>
+
+      <input id="email" type="email" placeholder="E-mail">
+      <input id="senha" type="password" placeholder="Senha">
+
+      <button onclick="login()">Entrar</button>
+
+      <p id="loginMsg"></p>
+    </section>
+
+    <section id="sistemaBox" class="hidden">
+
+      <aside class="sidebar">
+        <h2>Gestor CNC</h2>
+
+        <button onclick="mostrarTela('telaDashboard')">Dashboard</button>
+        <button id="menuCadastro" onclick="mostrarTela('telaCadastro')">Cadastrar Ferramenta</button>
+        <button id="menuEditar" onclick="mostrarTela('telaEditar')">Editar / Excluir</button>
+        <button onclick="mostrarTela('telaQuebra')">Registrar Quebra</button>
+        <button onclick="mostrarTela('telaAlertas')">Alertas</button>
+        <button id="menuUsuarios" onclick="mostrarTela('telaUsuarios')">Usuários</button>
+        <button onclick="logout()">Sair</button>
+      </aside>
+
+      <main class="main">
+
+        <header>
+          <div>
+            <h1>Dashboard</h1>
+            <p id="usuarioInfo"></p>
+          </div>
+        </header>
+
+        <section id="telaDashboard" class="tela ativa">
+
+          <div class="dashboard-grid">
+            <div class="dashboard-card">
+              <h3>Total de Ferramentas</h3>
+              <strong id="totalFerramentas">0</strong>
+            </div>
+
+            <div class="dashboard-card">
+              <h3>Fresas Topo</h3>
+              <strong id="totalTopo">0</strong>
+            </div>
+
+            <div class="dashboard-card">
+              <h3>Fresas Esféricas</h3>
+              <strong id="totalEsferica">0</strong>
+            </div>
+          </div>
+
+          <div class="card">
+            <h2>Alertas de Estoque</h2>
+            <div id="dashboardAlertas"></div>
+          </div>
+
+          <div class="card">
+            <h2>Fresas Topo</h2>
+            <div id="listaFresasTopo"></div>
+          </div>
+
+          <div class="card">
+            <h2>Fresas Esféricas</h2>
+            <div id="listaFresasEsfericas"></div>
+          </div>
+
+          <div class="card">
+            <h2>Outras Ferramentas</h2>
+            <div id="listaOutrasFerramentas"></div>
+          </div>
+
+        </section>
+
+        <section id="telaCadastro" class="tela">
+
+          <div id="areaCadastroFerramenta" class="card">
+            <h2>Cadastrar Ferramenta</h2>
+
+            <input id="tipo" placeholder="Tipo">
+            <input id="diametro" type="number" placeholder="Diâmetro">
+            <input id="comprimento" type="number" placeholder="Comprimento">
+            <input id="material" placeholder="Material">
+            <input id="quantidade" type="number" placeholder="Quantidade">
+
+            <button onclick="cadastrarFerramenta()">Cadastrar</button>
+          </div>
+
+        </section>
+
+        <section id="telaEditar" class="tela">
+
+          <div id="areaEditarExcluirFerramenta" class="card">
+            <h2>Buscar / Atualizar / Excluir Ferramenta</h2>
+
+            <input id="idFerramentaAcao" type="number" placeholder="ID da ferramenta">
+
+            <button onclick="buscarFerramentaPorId()">Buscar</button>
+            <button onclick="excluirFerramenta()">Excluir</button>
+
+            <hr>
+
+            <input id="editTipo" placeholder="Tipo">
+            <input id="editDiametro" type="number" placeholder="Diâmetro">
+            <input id="editComprimento" type="number" placeholder="Comprimento">
+            <input id="editMaterial" placeholder="Material">
+            <input id="editQuantidade" type="number" placeholder="Quantidade">
+
+            <button onclick="atualizarFerramenta()">Atualizar Ferramenta</button>
+
+            <div id="resultadoBusca"></div>
+          </div>
+
+        </section>
+
+        <section id="telaQuebra" class="tela">
+
+          <div class="card">
+            <h2>Registrar Ferramenta Quebrada</h2>
+
+            <input id="idQuebra" type="number" placeholder="ID da ferramenta">
+            <input id="qtdQuebra" type="number" placeholder="Quantidade quebrada">
+
+            <button onclick="registrarQuebra()">Registrar Quebra</button>
+          </div>
+
+        </section>
+
+        <section id="telaAlertas" class="tela">
+
+          <div class="card">
+            <h2>Alertas de Estoque</h2>
+            <button onclick="listarAlertas()">Atualizar Alertas</button>
+            <div id="listaAlertas"></div>
+          </div>
+
+        </section>
+
+        <section id="telaUsuarios" class="tela">
+
+          <div id="areaUsuarios" class="card hidden">
+            <h2>Gerenciamento de Usuários</h2>
+
+            <h3>Cadastrar Usuário</h3>
+
+            <input id="usuarioNome" placeholder="Nome">
+            <input id="usuarioEmail" placeholder="E-mail">
+            <input id="usuarioSenha" placeholder="Senha">
+
+            <select id="usuarioTipo">
+              <option value="administrador">Administrador</option>
+              <option value="engenheiro">Engenheiro</option>
+              <option value="operador">Operador</option>
+            </select>
+
+            <button onclick="cadastrarUsuario()">Cadastrar Usuário</button>
+
+            <hr>
+
+            <h3>Atualizar Usuário</h3>
+
+            <input id="usuarioIdEditar" type="number" placeholder="ID do usuário">
+            <input id="usuarioNomeEditar" placeholder="Nome">
+            <input id="usuarioEmailEditar" placeholder="E-mail">
+            <input id="usuarioSenhaEditar" placeholder="Senha">
+
+            <select id="usuarioTipoEditar">
+              <option value="administrador">Administrador</option>
+              <option value="engenheiro">Engenheiro</option>
+              <option value="operador">Operador</option>
+            </select>
+
+            <button onclick="buscarUsuarioPorId()">Buscar Usuário</button>
+            <button onclick="atualizarUsuario()">Atualizar Usuário</button>
+
+            <hr>
+
+            <h3>Lista de Usuários</h3>
+
+            <button onclick="listarUsuarios()">Atualizar Lista</button>
+
+            <div id="listaUsuarios"></div>
+          </div>
+
+        </section>
+
+      </main>
+
+    </section>
+
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
