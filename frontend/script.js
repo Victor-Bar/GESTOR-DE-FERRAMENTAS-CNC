@@ -61,8 +61,10 @@ function mostrarSistema() {
         }
     }
 
-    mostrarTela('telaDashboard');
-    carregarDashboard();
+  mostrarTela('telaDashboard');
+
+carregarDashboard();
+carregarSelectFerramentas();
 }
 
 function mostrarTela(idTela) {
@@ -131,7 +133,7 @@ async function carregarDashboard() {
 
     const topo = [];
     const esferica = [];
-    const outras = [];
+
 
     ferramentas.forEach(f => {
         const tipo = (f.tipo || '').toLowerCase();
@@ -143,55 +145,43 @@ async function carregarDashboard() {
             tipo.includes('esférica')
         ) {
             esferica.push(f);
-        } else {
-            outras.push(f);
-        }
+        } 
     });
 
-    document.getElementById('totalFerramentas').innerText = ferramentas.length;
-    document.getElementById('totalTopo').innerText = topo.length;
-    document.getElementById('totalEsferica').innerText = esferica.length;
 
     const topoDiv = document.getElementById('listaFresasTopo');
     const esfericaDiv = document.getElementById('listaFresasEsfericas');
-    const outrasDiv = document.getElementById('listaOutrasFerramentas');
+
 
     topoDiv.innerHTML = '';
     esfericaDiv.innerHTML = '';
-    outrasDiv.innerHTML = '';
+   
+topo.forEach(f => {
+    topoDiv.innerHTML += `
+        <div class="item">
+        
+            <strong>${f.tipo}</strong><br>
+            Diâmetro: ${Number(f.diametro)}<br>
+            Comprimento: ${Number(f.comprimento)}<br>
+            Material: ${f.material}<br>
+            Quantidade: ${f.quantidade}
+        </div>
+    `;
+});
 
-    topo.forEach(f => {
-        topoDiv.innerHTML += `
-            <div class="item">
-                <strong>ID:</strong> ${f.id}<br>
-                <strong>${f.tipo}</strong><br>
-                Material: ${f.material}<br>
-                Quantidade: ${f.quantidade}
-            </div>
-        `;
-    });
+esferica.forEach(f => {
+    esfericaDiv.innerHTML += `
+        <div class="item">
+       
+            <strong>${f.tipo}</strong><br>
+            Diâmetro: ${Number(f.diametro)}<br>
+            Comprimento: ${Number(f.comprimento)}<br>
+            Material: ${f.material}<br>
+            Quantidade: ${f.quantidade}
+        </div>
+    `;
+});
 
-    esferica.forEach(f => {
-        esfericaDiv.innerHTML += `
-            <div class="item">
-                <strong>ID:</strong> ${f.id}<br>
-                <strong>${f.tipo}</strong><br>
-                Material: ${f.material}<br>
-                Quantidade: ${f.quantidade}
-            </div>
-        `;
-    });
-
-    outras.forEach(f => {
-        outrasDiv.innerHTML += `
-            <div class="item">
-                <strong>ID:</strong> ${f.id}<br>
-                <strong>${f.tipo}</strong><br>
-                Material: ${f.material}<br>
-                Quantidade: ${f.quantidade}
-            </div>
-        `;
-    });
 
     carregarAlertasDashboard();
     listarFerramentas();
@@ -214,12 +204,15 @@ async function carregarAlertasDashboard() {
 
     dados.ferramentas.forEach(f => {
         lista.innerHTML += `
-            <div class="item">
-                <strong>${f.tipo}</strong><br>
-                Quantidade: ${f.quantidade}<br>
-                Alerta: ${f.nivel_alerta}
-            </div>
-        `;
+    <div class="item">
+        <strong>${f.tipo}</strong><br>
+        Diâmetro: ${Number(f.diametro)}<br>
+Comprimento: ${Number(f.comprimento)}<br>
+Material: ${f.material}<br>
+Quantidade: ${f.quantidade}<br>
+Alerta: ${f.nivel_alerta}
+    </div>
+`;
     });
 }
 
@@ -243,13 +236,89 @@ async function listarFerramentas() {
             <div class="item">
                 <strong>ID:</strong> ${f.id}<br>
                 <strong>Tipo:</strong> ${f.tipo}<br>
-                <strong>Diâmetro:</strong> ${f.diametro}<br>
+                <strong>Diâmetro:</strong> ${Number(f.diametro)}<br>
                 <strong>Comprimento:</strong> ${f.comprimento}<br>
                 <strong>Material:</strong> ${f.material}<br>
                 <strong>Quantidade:</strong> ${f.quantidade}
             </div>
         `;
     });
+}
+
+async function carregarSelectFerramentas() {
+
+    const resposta = await fetch(`${API}/ferramentas`, {
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
+    });
+
+    const ferramentas = await resposta.json();
+
+    const selectEditar =
+        document.getElementById('idFerramentaAcao');
+
+    const selectQuebra =
+        document.getElementById('idQuebra');
+
+    if (!selectEditar || !selectQuebra) return;
+
+    selectEditar.innerHTML = `
+        <option value="">Selecione uma ferramenta</option>
+        <optgroup label="Fresas Topo" id="grupoTopoEditar"></optgroup>
+        <optgroup label="Fresas Esféricas" id="grupoEsfericaEditar"></optgroup>
+    `;
+
+    selectQuebra.innerHTML = `
+        <option value="">Selecione uma ferramenta</option>
+        <optgroup label="Fresas Topo" id="grupoTopoQuebra"></optgroup>
+        <optgroup label="Fresas Esféricas" id="grupoEsfericaQuebra"></optgroup>
+    `;
+
+    const grupoTopoEditar =
+        document.getElementById('grupoTopoEditar');
+
+    const grupoEsfericaEditar =
+        document.getElementById('grupoEsfericaEditar');
+
+    const grupoTopoQuebra =
+        document.getElementById('grupoTopoQuebra');
+
+    const grupoEsfericaQuebra =
+        document.getElementById('grupoEsfericaQuebra');
+
+    ferramentas.forEach(f => {
+
+        const texto = `
+            Ø${Number(f.diametro)}
+            - ${f.tipo}
+            - ${f.material}
+        `;
+
+        const optionEditar =
+            document.createElement('option');
+
+        optionEditar.value = f.id;
+        optionEditar.textContent = texto;
+
+        const optionQuebra =
+            document.createElement('option');
+
+        optionQuebra.value = f.id;
+        optionQuebra.textContent = texto;
+
+        if (
+            f.tipo.toLowerCase().includes('topo')
+        ) {
+            grupoTopoEditar.appendChild(optionEditar);
+            grupoTopoQuebra.appendChild(optionQuebra);
+        } else {
+            grupoEsfericaEditar.appendChild(optionEditar);
+            grupoEsfericaQuebra.appendChild(optionQuebra);
+        }
+
+    });
+
 }
 
 async function cadastrarFerramenta() {
@@ -304,8 +373,10 @@ async function buscarFerramentaPorId() {
     }
 
     document.getElementById('editTipo').value = ferramenta.tipo;
-    document.getElementById('editDiametro').value = ferramenta.diametro;
-    document.getElementById('editComprimento').value = ferramenta.comprimento;
+   document.getElementById('editDiametro').value =
+    Number(ferramenta.diametro);
+document.getElementById('editComprimento').value =
+    Number(ferramenta.comprimento);
     document.getElementById('editMaterial').value = ferramenta.material;
     document.getElementById('editQuantidade').value = ferramenta.quantidade;
 
@@ -407,13 +478,16 @@ async function listarAlertas() {
     lista.innerHTML = '';
 
     dados.ferramentas.forEach(f => {
-        lista.innerHTML += `
-            <div class="item">
-                <strong>${f.tipo}</strong><br>
-                Quantidade: ${f.quantidade}<br>
-                Alerta: ${f.nivel_alerta}
-            </div>
-        `;
+  lista.innerHTML += `
+    <div class="item">
+        <strong>${f.tipo}</strong><br>
+        Diâmetro: ${Number(f.diametro)}<br>
+Comprimento: ${Number(f.comprimento)}<br>
+Material: ${f.material}<br>
+Quantidade: ${f.quantidade}<br>
+Alerta: ${f.nivel_alerta}
+    </div>
+`;
     });
 }
 
