@@ -61,3 +61,6 @@ exports.atualizarQuantidade = (novaQtd, id, callback) => {
 exports.registrarQuebra = (id, quantidade, callback) => {
     ferramentaModel.registrarQuebra(id, quantidade, callback);
 };
+
+/*vamos manter o services caso futuramente precisamos enserir 
+regras de negocio assim da para deixar mais organizado*/

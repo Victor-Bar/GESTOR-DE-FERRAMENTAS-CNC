@@ -77,7 +77,7 @@ exports.buscarPorId = (req, res) => {
     };
 
 exports.cadastrar = (req, res) => {
-
+/*pegando*/
     const {
         tipo,
         diametro,
@@ -91,7 +91,7 @@ exports.cadastrar = (req, res) => {
             erro: 'Preencha todos os campos'
         });
     }
-
+//*Envia os dados para o Service, que fará a comunicação com o Model*//
     ferramentasService.cadastrar(
         tipo,
         diametro,
