@@ -637,7 +637,7 @@ hr {
 /* ALERTAS */
 
 .alerta-critico {
-    border-left: 5px solid #ef4444;
+    border-left: 5px solid #e00000;
     background: rgba(239, 68, 68, 0.12);
 }
 
