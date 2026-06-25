@@ -2,6 +2,9 @@ const API = 'http://localhost:3000';
 
 let token = localStorage.getItem('token');
 let usuarioLogado = null;
+let ferramentasCache = [];
+let imagemCadastroBase64 = null;
+let ferramentaSelecionadaImagem = null;
 
 function decodificarToken(token) {
     try {
@@ -10,6 +13,133 @@ function decodificarToken(token) {
     } catch (erro) {
         return null;
     }
+}
+
+function headersAuth() {
+    return {
+        Authorization: `Bearer ${token}`
+    };
+}
+
+function headersJsonAuth() {
+    return {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`
+    };
+}
+
+function formatarNumero(valor) {
+    return Number(valor || 0).toLocaleString('pt-BR');
+}
+
+function formatarMedida(valor) {
+    return Number(valor || 0).toLocaleString('pt-BR');
+}
+
+function normalizarTipo(tipo) {
+    return (tipo || '')
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '');
+}
+
+function ehFresaTopo(ferramenta) {
+    return normalizarTipo(ferramenta.tipo).includes('topo');
+}
+
+function ehFresaEsferica(ferramenta) {
+    return normalizarTipo(ferramenta.tipo).includes('esferica');
+}
+
+function obterClasseAlerta(nivel) {
+    const texto = (nivel || '').toUpperCase();
+
+    if (texto.includes('CRÍTICO') || texto.includes('CRITICO')) {
+        return 'alerta-critico';
+    }
+
+    if (texto.includes('ALTO')) {
+        return 'alerta-alto';
+    }
+
+    return 'alerta-baixo';
+}
+
+function formatarData(data) {
+    if (!data) return 'Sem data';
+
+    const d = new Date(data);
+
+    if (isNaN(d.getTime())) {
+        return data;
+    }
+
+    return d.toLocaleString('pt-BR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+}
+
+function obterChaveMes(data) {
+    const d = new Date(data);
+
+    if (isNaN(d.getTime())) {
+        return 'Sem data';
+    }
+
+    return d.toLocaleDateString('pt-BR', {
+        month: 'long',
+        year: 'numeric'
+    });
+}
+
+function atualizarTituloPagina(idTela) {
+    const titulo = document.getElementById('tituloPagina');
+
+    if (!titulo) return;
+
+    const titulos = {
+        telaDashboard: 'Dashboard',
+        telaFerramentas: 'Lista de Ferramentas',
+        telaCadastro: 'Cadastrar Ferramenta',
+        telaEditar: 'Editar / Excluir',
+        telaQuebra: 'Registrar Quebra',
+        telaHistoricoQuebras: 'Histórico de Quebras',
+        telaAlertas: 'Alertas',
+        telaUsuarios: 'Usuários'
+    };
+
+    titulo.innerText = titulos[idTela] || 'Gestor CNC';
+}
+
+function iconeUploadFoto() {
+    return `
+        <svg class="upload-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M14 2H6C4.9 2 4 2.9 4 4V20C4 21.1 4.9 22 6 22H18C19.1 22 20 21.1 20 20V8L14 2Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+            <path d="M14 2V8H20" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+            <path d="M12 12V18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            <path d="M9 15H15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+        </svg>
+    `;
+}
+
+function converterImagemParaBase64(arquivo) {
+    return new Promise((resolve, reject) => {
+        const leitor = new FileReader();
+
+        leitor.onload = () => {
+            resolve(leitor.result);
+        };
+
+        leitor.onerror = () => {
+            reject('Erro ao ler imagem');
+        };
+
+        leitor.readAsDataURL(arquivo);
+    });
 }
 
 if (token) {
@@ -32,7 +162,7 @@ async function login() {
         const dados = await resposta.json();
 
         if (!resposta.ok) {
-            throw new Error(dados.erro);
+            throw new Error(dados.erro || 'Erro ao fazer login');
         }
 
         localStorage.setItem('token', dados.token);
@@ -61,10 +191,10 @@ function mostrarSistema() {
         }
     }
 
-  mostrarTela('telaDashboard');
+    mostrarTela('telaDashboard');
 
-carregarDashboard();
-carregarSelectFerramentas();
+    carregarDashboard();
+    carregarSelectFerramentas();
 }
 
 function mostrarTela(idTela) {
@@ -72,7 +202,29 @@ function mostrarTela(idTela) {
         tela.classList.remove('ativa');
     });
 
-    document.getElementById(idTela).classList.add('ativa');
+    const tela = document.getElementById(idTela);
+
+    if (tela) {
+        tela.classList.add('ativa');
+    }
+
+    atualizarTituloPagina(idTela);
+
+    if (idTela === 'telaDashboard') {
+        carregarDashboard();
+    }
+
+    if (idTela === 'telaFerramentas') {
+        carregarDashboard();
+    }
+
+    if (idTela === 'telaHistoricoQuebras') {
+        listarHistoricoQuebras();
+    }
+
+    if (idTela === 'telaAlertas') {
+        listarAlertas();
+    }
 }
 
 function aplicarPermissoes() {
@@ -122,204 +274,478 @@ function logout() {
     location.reload();
 }
 
+/* IMAGEM NO CADASTRO */
+
+function abrirInputImagemCadastro() {
+    document.getElementById('imagemCadastroInput').click();
+}
+
+async function selecionarImagemCadastro(event) {
+    const arquivo = event.target.files[0];
+
+    if (!arquivo) return;
+
+    try {
+        imagemCadastroBase64 = await converterImagemParaBase64(arquivo);
+
+        document.getElementById('previewImagemCadastro').innerHTML = `
+            <img src="${imagemCadastroBase64}" alt="Imagem da ferramenta">
+        `;
+
+        document.getElementById('btnRemoverImagemCadastro').classList.remove('hidden');
+
+    } catch (erro) {
+        console.log(erro);
+        alert('Erro ao carregar imagem');
+    }
+}
+
+function removerImagemCadastro() {
+    imagemCadastroBase64 = null;
+
+    document.getElementById('imagemCadastroInput').value = '';
+
+    document.getElementById('previewImagemCadastro').innerHTML = iconeUploadFoto();
+
+    document.getElementById('btnRemoverImagemCadastro').classList.add('hidden');
+}
+
+/* DASHBOARD E LISTAS */
+
 async function carregarDashboard() {
-    const resposta = await fetch(`${API}/ferramentas`, {
-        headers: {
-            Authorization: `Bearer ${token}`
+    try {
+        const resposta = await fetch(`${API}/ferramentas`, {
+            headers: headersAuth()
+        });
+
+        const ferramentas = await resposta.json();
+
+        if (!resposta.ok) {
+            throw new Error(ferramentas.erro || 'Erro ao carregar ferramentas');
         }
-    });
 
-    const ferramentas = await resposta.json();
+        ferramentasCache = ferramentas;
 
-    const topo = [];
-    const esferica = [];
+        const topo = ferramentas.filter(ehFresaTopo);
+        const esferica = ferramentas.filter(ehFresaEsferica);
 
+        const totalTopo = topo.reduce((total, f) => total + Number(f.quantidade || 0), 0);
+        const totalEsferica = esferica.reduce((total, f) => total + Number(f.quantidade || 0), 0);
 
-    ferramentas.forEach(f => {
-        const tipo = (f.tipo || '').toLowerCase();
+        const totalTopoDashboard = document.getElementById('totalFresasTopoDashboard');
+        const totalEsfericaDashboard = document.getElementById('totalFresasEsfericasDashboard');
 
-        if (tipo.includes('topo')) {
-            topo.push(f);
-        } else if (
-            tipo.includes('esferica') ||
-            tipo.includes('esférica')
-        ) {
-            esferica.push(f);
-        } 
-    });
+        if (totalTopoDashboard) {
+            totalTopoDashboard.innerText = formatarNumero(totalTopo);
+        }
 
+        if (totalEsfericaDashboard) {
+            totalEsfericaDashboard.innerText = formatarNumero(totalEsferica);
+        }
 
-    const topoDiv = document.getElementById('listaFresasTopo');
-    const esfericaDiv = document.getElementById('listaFresasEsfericas');
+        renderizarListaFerramentas(topo, 'listaFresasTopo');
+        renderizarListaFerramentas(esferica, 'listaFresasEsfericas');
 
+        await carregarAlertasDashboard();
+        await carregarQuebrasDashboard();
 
-    topoDiv.innerHTML = '';
-    esfericaDiv.innerHTML = '';
-   
-topo.forEach(f => {
-    topoDiv.innerHTML += `
-        <div class="item">
-        
-            <strong>${f.tipo}</strong><br>
-            Diâmetro: ${Number(f.diametro)}<br>
-            Comprimento: ${Number(f.comprimento)}<br>
-            Material: ${f.material}<br>
-            Quantidade: ${f.quantidade}
-        </div>
-    `;
-});
-
-esferica.forEach(f => {
-    esfericaDiv.innerHTML += `
-        <div class="item">
-       
-            <strong>${f.tipo}</strong><br>
-            Diâmetro: ${Number(f.diametro)}<br>
-            Comprimento: ${Number(f.comprimento)}<br>
-            Material: ${f.material}<br>
-            Quantidade: ${f.quantidade}
-        </div>
-    `;
-});
-
-
-    carregarAlertasDashboard();
-    listarFerramentas();
+    } catch (erro) {
+        console.log(erro);
+    }
 }
 
-async function carregarAlertasDashboard() {
-    const resposta = await fetch(`${API}/ferramentas/alertas`, {
-        headers: {
-            Authorization: `Bearer ${token}`
-        }
-    });
-
-    const dados = await resposta.json();
-
-    const lista = document.getElementById('dashboardAlertas');
+function renderizarListaFerramentas(ferramentas, idElemento) {
+    const lista = document.getElementById(idElemento);
 
     if (!lista) return;
 
     lista.innerHTML = '';
 
-    dados.ferramentas.forEach(f => {
-        lista.innerHTML += `
-    <div class="item">
-        <strong>${f.tipo}</strong><br>
-        Diâmetro: ${Number(f.diametro)}<br>
-Comprimento: ${Number(f.comprimento)}<br>
-Material: ${f.material}<br>
-Quantidade: ${f.quantidade}<br>
-Alerta: ${f.nivel_alerta}
-    </div>
-`;
-    });
-}
-
-async function listarFerramentas() {
-    const resposta = await fetch(`${API}/ferramentas`, {
-        headers: {
-            Authorization: `Bearer ${token}`
-        }
-    });
-
-    const ferramentas = await resposta.json();
-
-    const lista = document.getElementById('listaFerramentas');
-
-    if (!lista) return;
-
-    lista.innerHTML = '';
+    if (!ferramentas || ferramentas.length === 0) {
+        lista.innerHTML = `<div class="item">Nenhuma ferramenta encontrada.</div>`;
+        return;
+    }
 
     ferramentas.forEach(f => {
+        const fotoHtml = f.imagem_url
+            ? `<img src="${f.imagem_url}" alt="${f.tipo}">`
+            : iconeUploadFoto();
+
         lista.innerHTML += `
-            <div class="item">
-                <strong>ID:</strong> ${f.id}<br>
-                <strong>Tipo:</strong> ${f.tipo}<br>
-                <strong>Diâmetro:</strong> ${Number(f.diametro)}<br>
-                <strong>Comprimento:</strong> ${f.comprimento}<br>
-                <strong>Material:</strong> ${f.material}<br>
-                <strong>Quantidade:</strong> ${f.quantidade}
+            <div class="item item-ferramenta">
+
+                <div class="ferramenta-info">
+                    <strong>${f.tipo}</strong><br>
+                    Diâmetro: Ø${formatarMedida(f.diametro)} mm<br>
+                    Comprimento: ${formatarMedida(f.comprimento)} mm<br>
+                    Material: ${f.material}<br>
+                    Quantidade: ${f.quantidade} un.
+                </div>
+
+                <div class="foto-area">
+                    <div class="foto-visual-box">
+                        ${fotoHtml}
+                    </div>
+                </div>
+
             </div>
         `;
     });
 }
 
-async function carregarSelectFerramentas() {
+/* MODAL PARA EDITAR IMAGEM */
 
-    const resposta = await fetch(`${API}/ferramentas`, {
-        headers: {
-            Authorization: `Bearer ${token}`
-        }
+function criarModalImagemSeNaoExistir() {
+    if (document.getElementById('modalImagemFerramenta')) return;
+
+    const modal = document.createElement('div');
+
+    modal.id = 'modalImagemFerramenta';
+    modal.className = 'modal-imagem hidden';
+
+    modal.innerHTML = `
+        <div class="modal-imagem-conteudo">
+            <h3>Imagem da ferramenta</h3>
+            <p>Escolha uma ação para esta ferramenta.</p>
+
+            <div class="modal-imagem-acoes">
+                <button type="button" onclick="atualizarImagemSelecionada()">
+                    Atualizar imagem
+                </button>
+
+                <button type="button" class="btn-danger" onclick="removerImagemSelecionada()">
+                    Remover imagem
+                </button>
+
+                <button type="button" class="btn-cancelar" onclick="fecharOpcoesImagem()">
+                    Cancelar
+                </button>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+}
+
+function abrirOpcoesImagem(id) {
+    ferramentaSelecionadaImagem = id;
+
+    criarModalImagemSeNaoExistir();
+
+    const modal = document.getElementById('modalImagemFerramenta');
+
+    modal.classList.remove('hidden');
+}
+
+function fecharOpcoesImagem() {
+    const modal = document.getElementById('modalImagemFerramenta');
+
+    if (modal) {
+        modal.classList.add('hidden');
+    }
+
+    ferramentaSelecionadaImagem = null;
+}
+
+function atualizarImagemSelecionada() {
+    if (!ferramentaSelecionadaImagem) return;
+
+    const input = document.getElementById(`foto-editar-${ferramentaSelecionadaImagem}`);
+
+    if (input) {
+        input.click();
+    }
+
+    fecharOpcoesImagem();
+}
+
+async function removerImagemSelecionada() {
+    if (!ferramentaSelecionadaImagem) return;
+
+    const confirmar = confirm('Deseja remover a imagem desta ferramenta?');
+
+    if (!confirmar) return;
+
+    await atualizarImagemFerramenta(ferramentaSelecionadaImagem, null);
+
+    const ferramenta = ferramentasCache.find(f => Number(f.id) === Number(ferramentaSelecionadaImagem));
+
+    if (ferramenta) {
+        ferramenta.imagem_url = null;
+        renderizarPreviewImagemEditar(ferramenta);
+    }
+
+    fecharOpcoesImagem();
+}
+
+async function atualizarImagemFerramenta(id, imagem_url) {
+    const ferramenta = ferramentasCache.find(f => Number(f.id) === Number(id));
+
+    if (!ferramenta) {
+        alert('Ferramenta não encontrada na lista');
+        return;
+    }
+
+    const resposta = await fetch(`${API}/ferramentas/${id}`, {
+        method: 'PUT',
+        headers: headersJsonAuth(),
+        body: JSON.stringify({
+            tipo: ferramenta.tipo,
+            diametro: ferramenta.diametro,
+            comprimento: ferramenta.comprimento,
+            material: ferramenta.material,
+            quantidade: ferramenta.quantidade,
+            imagem_url
+        })
     });
 
-    const ferramentas = await resposta.json();
+    const dados = await resposta.json();
 
-    const selectEditar =
-        document.getElementById('idFerramentaAcao');
+    if (!resposta.ok) {
+        alert(dados.erro || 'Erro ao atualizar imagem');
+        return;
+    }
 
-    const selectQuebra =
-        document.getElementById('idQuebra');
+    ferramenta.imagem_url = imagem_url;
 
-    if (!selectEditar || !selectQuebra) return;
+    carregarDashboard();
+    carregarSelectFerramentas();
 
-    selectEditar.innerHTML = `
-        <option value="">Selecione uma ferramenta</option>
-        <optgroup label="Fresas Topo" id="grupoTopoEditar"></optgroup>
-        <optgroup label="Fresas Esféricas" id="grupoEsfericaEditar"></optgroup>
+    if (document.getElementById('previewImagemEditar')) {
+        renderizarPreviewImagemEditar(ferramenta);
+    }
+}
+
+async function salvarImagemFerramentaEditar(event, id) {
+    const arquivo = event.target.files[0];
+
+    if (!arquivo) return;
+
+    try {
+        const imagem_url = await converterImagemParaBase64(arquivo);
+        await atualizarImagemFerramenta(id, imagem_url);
+
+        event.target.value = '';
+
+    } catch (erro) {
+        console.log(erro);
+        alert('Erro ao salvar imagem');
+    }
+}
+
+function renderizarPreviewImagemEditar(ferramenta) {
+    const preview = document.getElementById('previewImagemEditar');
+
+    if (!preview) return;
+
+    const inputId = `foto-editar-${ferramenta.id}`;
+
+    const imagemHtml = ferramenta.imagem_url
+        ? `<img src="${ferramenta.imagem_url}" alt="${ferramenta.tipo}">`
+        : iconeUploadFoto();
+
+    preview.innerHTML = `
+        <div>
+            <button type="button" class="preview-imagem-box" onclick="abrirOpcoesImagem(${ferramenta.id})">
+                ${imagemHtml}
+            </button>
+
+            <input
+                id="${inputId}"
+                class="input-foto-hidden"
+                type="file"
+                accept="image/*"
+                onchange="salvarImagemFerramentaEditar(event, ${ferramenta.id})"
+            >
+
+            <div class="preview-info-editar">
+                <strong>${ferramenta.tipo}</strong><br>
+                Diâmetro: Ø${formatarMedida(ferramenta.diametro)} mm<br>
+                Comprimento: ${formatarMedida(ferramenta.comprimento)} mm<br>
+                Material: ${ferramenta.material}<br>
+                Quantidade: ${ferramenta.quantidade} un.
+            </div>
+        </div>
     `;
+}
 
-    selectQuebra.innerHTML = `
-        <option value="">Selecione uma ferramenta</option>
-        <optgroup label="Fresas Topo" id="grupoTopoQuebra"></optgroup>
-        <optgroup label="Fresas Esféricas" id="grupoEsfericaQuebra"></optgroup>
-    `;
+/* ALERTAS E QUEBRAS */
 
-    const grupoTopoEditar =
-        document.getElementById('grupoTopoEditar');
+async function carregarAlertasDashboard() {
+    try {
+        const resposta = await fetch(`${API}/ferramentas/alertas`, {
+            headers: headersAuth()
+        });
 
-    const grupoEsfericaEditar =
-        document.getElementById('grupoEsfericaEditar');
+        const dados = await resposta.json();
 
-    const grupoTopoQuebra =
-        document.getElementById('grupoTopoQuebra');
+        if (!resposta.ok) {
+            throw new Error(dados.erro || 'Erro ao carregar alertas');
+        }
 
-    const grupoEsfericaQuebra =
-        document.getElementById('grupoEsfericaQuebra');
+        const totalAlertasDashboard = document.getElementById('totalAlertasDashboard');
 
-    ferramentas.forEach(f => {
+        if (totalAlertasDashboard) {
+            totalAlertasDashboard.innerText = dados.total_alertas || dados.ferramentas.length || 0;
+        }
 
-        const texto = `
-            Ø${Number(f.diametro)}
-            - ${f.tipo}
-            - ${f.material}
+        renderizarAlertas(dados.ferramentas, 'dashboardAlertas', 5);
+
+    } catch (erro) {
+        console.log(erro);
+    }
+}
+
+function renderizarAlertas(alertas, idElemento, limite = null) {
+    const lista = document.getElementById(idElemento);
+
+    if (!lista) return;
+
+    lista.innerHTML = '';
+
+    if (!alertas || alertas.length === 0) {
+        lista.innerHTML = `<div class="item">Nenhum alerta de estoque no momento.</div>`;
+        return;
+    }
+
+    const dados = limite ? alertas.slice(0, limite) : alertas;
+
+    dados.forEach(f => {
+        const classe = obterClasseAlerta(f.nivel_alerta);
+
+        lista.innerHTML += `
+            <div class="item ${classe}">
+                <strong>${f.tipo}</strong><br>
+                Diâmetro: Ø${formatarMedida(f.diametro)} mm<br>
+                Comprimento: ${formatarMedida(f.comprimento)} mm<br>
+                Material: ${f.material}<br>
+                Quantidade: ${f.quantidade} un.<br>
+                Alerta: <strong>${f.nivel_alerta}</strong>
+            </div>
+        `;
+    });
+}
+
+async function carregarQuebrasDashboard() {
+    try {
+        const resposta = await fetch(`${API}/ferramentas/quebras`, {
+            headers: headersAuth()
+        });
+
+        const quebras = await resposta.json();
+
+        if (!resposta.ok) {
+            throw new Error(quebras.erro || 'Erro ao carregar histórico de quebras');
+        }
+
+        const totalQuebras = quebras.reduce((total, q) => {
+            return total + Number(q.quantidade || 0);
+        }, 0);
+
+        const totalQuebrasDashboard = document.getElementById('totalQuebrasDashboard');
+
+        if (totalQuebrasDashboard) {
+            totalQuebrasDashboard.innerText = formatarNumero(totalQuebras);
+        }
+
+        renderizarUltimasQuebras(quebras);
+
+    } catch (erro) {
+        console.log(erro);
+    }
+}
+
+function renderizarUltimasQuebras(quebras) {
+    const lista = document.getElementById('dashboardUltimasQuebras');
+
+    if (!lista) return;
+
+    lista.innerHTML = '';
+
+    if (!quebras || quebras.length === 0) {
+        lista.innerHTML = `<div class="item">Nenhuma quebra registrada.</div>`;
+        return;
+    }
+
+    quebras.slice(0, 5).forEach(q => {
+        lista.innerHTML += `
+            <div class="historico-item">
+                <strong>${q.tipo} Ø${formatarMedida(q.diametro)} mm</strong><br>
+                Comprimento: ${formatarMedida(q.comprimento)} mm<br>
+                Material: ${q.material}<br>
+                Quantidade quebrada: ${q.quantidade} un.<br>
+                Data: ${formatarData(q.data_quebra)}
+            </div>
+        `;
+    });
+}
+
+async function listarFerramentas() {
+    await carregarDashboard();
+}
+
+async function carregarSelectFerramentas() {
+    try {
+        const resposta = await fetch(`${API}/ferramentas`, {
+            headers: headersAuth()
+        });
+
+        const ferramentas = await resposta.json();
+
+        if (!resposta.ok) {
+            throw new Error(ferramentas.erro || 'Erro ao carregar ferramentas');
+        }
+
+        ferramentasCache = ferramentas;
+
+        const selectEditar = document.getElementById('idFerramentaAcao');
+        const selectQuebra = document.getElementById('idQuebra');
+
+        if (!selectEditar || !selectQuebra) return;
+
+        selectEditar.innerHTML = `
+            <option value="">Selecione uma ferramenta</option>
+            <optgroup label="Fresas Topo" id="grupoTopoEditar"></optgroup>
+            <optgroup label="Fresas Esféricas" id="grupoEsfericaEditar"></optgroup>
         `;
 
-        const optionEditar =
-            document.createElement('option');
+        selectQuebra.innerHTML = `
+            <option value="">Selecione uma ferramenta</option>
+            <optgroup label="Fresas Topo" id="grupoTopoQuebra"></optgroup>
+            <optgroup label="Fresas Esféricas" id="grupoEsfericaQuebra"></optgroup>
+        `;
 
-        optionEditar.value = f.id;
-        optionEditar.textContent = texto;
+        const grupoTopoEditar = document.getElementById('grupoTopoEditar');
+        const grupoEsfericaEditar = document.getElementById('grupoEsfericaEditar');
+        const grupoTopoQuebra = document.getElementById('grupoTopoQuebra');
+        const grupoEsfericaQuebra = document.getElementById('grupoEsfericaQuebra');
 
-        const optionQuebra =
-            document.createElement('option');
+        ferramentas.forEach(f => {
+            const texto = `Ø${formatarMedida(f.diametro)} - ${f.tipo} - ${f.material} - ${f.quantidade} un.`;
 
-        optionQuebra.value = f.id;
-        optionQuebra.textContent = texto;
+            const optionEditar = document.createElement('option');
+            optionEditar.value = f.id;
+            optionEditar.textContent = texto;
 
-        if (
-            f.tipo.toLowerCase().includes('topo')
-        ) {
-            grupoTopoEditar.appendChild(optionEditar);
-            grupoTopoQuebra.appendChild(optionQuebra);
-        } else {
-            grupoEsfericaEditar.appendChild(optionEditar);
-            grupoEsfericaQuebra.appendChild(optionQuebra);
-        }
+            const optionQuebra = document.createElement('option');
+            optionQuebra.value = f.id;
+            optionQuebra.textContent = texto;
 
-    });
+            if (ehFresaTopo(f)) {
+                grupoTopoEditar.appendChild(optionEditar);
+                grupoTopoQuebra.appendChild(optionQuebra);
+            } else {
+                grupoEsfericaEditar.appendChild(optionEditar);
+                grupoEsfericaQuebra.appendChild(optionQuebra);
+            }
+        });
 
+    } catch (erro) {
+        console.log(erro);
+    }
 }
+
+/* CRUD FERRAMENTAS */
 
 async function cadastrarFerramenta() {
     const tipo = document.getElementById('tipo').value;
@@ -330,16 +756,14 @@ async function cadastrarFerramenta() {
 
     const resposta = await fetch(`${API}/ferramentas`, {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`
-        },
+        headers: headersJsonAuth(),
         body: JSON.stringify({
             tipo,
             diametro,
             comprimento,
             material,
-            quantidade
+            quantidade,
+            imagem_url: imagemCadastroBase64
         })
     });
 
@@ -347,22 +771,29 @@ async function cadastrarFerramenta() {
 
     alert(dados.mensagem || dados.erro);
 
-    listarFerramentas();
+    if (resposta.ok) {
+        document.getElementById('tipo').value = '';
+        document.getElementById('diametro').value = '';
+        document.getElementById('comprimento').value = '';
+        document.getElementById('material').value = '';
+        document.getElementById('quantidade').value = '';
+        removerImagemCadastro();
+    }
+
     carregarDashboard();
+    carregarSelectFerramentas();
 }
 
 async function buscarFerramentaPorId() {
     const id = document.getElementById('idFerramentaAcao').value;
 
     if (!id) {
-        alert('Informe um ID');
+        alert('Selecione uma ferramenta');
         return;
     }
 
     const resposta = await fetch(`${API}/ferramentas/${id}`, {
-        headers: {
-            Authorization: `Bearer ${token}`
-        }
+        headers: headersAuth()
     });
 
     const ferramenta = await resposta.json();
@@ -373,20 +804,35 @@ async function buscarFerramentaPorId() {
     }
 
     document.getElementById('editTipo').value = ferramenta.tipo;
-   document.getElementById('editDiametro').value =
-    Number(ferramenta.diametro);
-document.getElementById('editComprimento').value =
-    Number(ferramenta.comprimento);
+    document.getElementById('editDiametro').value = Number(ferramenta.diametro);
+    document.getElementById('editComprimento').value = Number(ferramenta.comprimento);
     document.getElementById('editMaterial').value = ferramenta.material;
     document.getElementById('editQuantidade').value = ferramenta.quantidade;
 
+    const index = ferramentasCache.findIndex(f => Number(f.id) === Number(ferramenta.id));
+
+    if (index >= 0) {
+        ferramentasCache[index] = ferramenta;
+    } else {
+        ferramentasCache.push(ferramenta);
+    }
+
     document.getElementById('resultadoBusca').innerHTML = `
-        <p>Ferramenta encontrada: <strong>${ferramenta.tipo}</strong></p>
+        <div class="item">
+            Ferramenta encontrada: <strong>${ferramenta.tipo}</strong>
+        </div>
     `;
+
+    renderizarPreviewImagemEditar(ferramenta);
 }
 
 async function atualizarFerramenta() {
     const id = document.getElementById('idFerramentaAcao').value;
+
+    if (!id) {
+        alert('Selecione uma ferramenta');
+        return;
+    }
 
     const tipo = document.getElementById('editTipo').value;
     const diametro = document.getElementById('editDiametro').value;
@@ -394,18 +840,19 @@ async function atualizarFerramenta() {
     const material = document.getElementById('editMaterial').value;
     const quantidade = document.getElementById('editQuantidade').value;
 
+    const ferramentaAtual = ferramentasCache.find(f => Number(f.id) === Number(id));
+    const imagem_url = ferramentaAtual ? ferramentaAtual.imagem_url || null : null;
+
     const resposta = await fetch(`${API}/ferramentas/${id}`, {
         method: 'PUT',
-        headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`
-        },
+        headers: headersJsonAuth(),
         body: JSON.stringify({
             tipo,
             diametro,
             comprimento,
             material,
-            quantidade
+            quantidade,
+            imagem_url
         })
     });
 
@@ -413,15 +860,15 @@ async function atualizarFerramenta() {
 
     alert(dados.mensagem || dados.erro);
 
-    listarFerramentas();
     carregarDashboard();
+    carregarSelectFerramentas();
 }
 
 async function excluirFerramenta() {
     const id = document.getElementById('idFerramentaAcao').value;
 
     if (!id) {
-        alert('Informe um ID');
+        alert('Selecione uma ferramenta');
         return;
     }
 
@@ -431,29 +878,40 @@ async function excluirFerramenta() {
 
     const resposta = await fetch(`${API}/ferramentas/${id}`, {
         method: 'DELETE',
-        headers: {
-            Authorization: `Bearer ${token}`
-        }
+        headers: headersAuth()
     });
 
     const dados = await resposta.json();
 
     alert(dados.mensagem || dados.erro);
 
-    listarFerramentas();
+    document.getElementById('previewImagemEditar').innerHTML = `
+        <div class="preview-imagem-vazio">
+            Selecione uma ferramenta e clique em buscar.
+        </div>
+    `;
+
     carregarDashboard();
+    carregarSelectFerramentas();
 }
 
 async function registrarQuebra() {
     const id = document.getElementById('idQuebra').value;
     const quantidade = document.getElementById('qtdQuebra').value;
 
+    if (!id) {
+        alert('Selecione uma ferramenta');
+        return;
+    }
+
+    if (!quantidade || Number(quantidade) <= 0) {
+        alert('Informe uma quantidade válida');
+        return;
+    }
+
     const resposta = await fetch(`${API}/ferramentas/${id}/quebrar`, {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`
-        },
+        headers: headersJsonAuth(),
         body: JSON.stringify({ quantidade })
     });
 
@@ -461,41 +919,106 @@ async function registrarQuebra() {
 
     alert(dados.mensagem || dados.erro);
 
-    listarFerramentas();
+    if (resposta.ok) {
+        document.getElementById('qtdQuebra').value = '';
+    }
+
     carregarDashboard();
+    carregarSelectFerramentas();
+    listarHistoricoQuebras();
 }
 
 async function listarAlertas() {
-    const resposta = await fetch(`${API}/ferramentas/alertas`, {
-        headers: {
-            Authorization: `Bearer ${token}`
+    try {
+        const resposta = await fetch(`${API}/ferramentas/alertas`, {
+            headers: headersAuth()
+        });
+
+        const dados = await resposta.json();
+
+        if (!resposta.ok) {
+            throw new Error(dados.erro || 'Erro ao listar alertas');
         }
-    });
 
-    const dados = await resposta.json();
+        renderizarAlertas(dados.ferramentas, 'listaAlertas');
 
-    const lista = document.getElementById('listaAlertas');
+    } catch (erro) {
+        console.log(erro);
+    }
+}
+
+async function listarHistoricoQuebras() {
+    try {
+        const resposta = await fetch(`${API}/ferramentas/quebras`, {
+            headers: headersAuth()
+        });
+
+        const quebras = await resposta.json();
+
+        if (!resposta.ok) {
+            throw new Error(quebras.erro || 'Erro ao listar histórico de quebras');
+        }
+
+        renderizarHistoricoQuebras(quebras);
+
+    } catch (erro) {
+        console.log(erro);
+    }
+}
+
+function renderizarHistoricoQuebras(quebras) {
+    const lista = document.getElementById('listaHistoricoQuebras');
+
+    if (!lista) return;
+
     lista.innerHTML = '';
 
-    dados.ferramentas.forEach(f => {
-  lista.innerHTML += `
-    <div class="item">
-        <strong>${f.tipo}</strong><br>
-        Diâmetro: ${Number(f.diametro)}<br>
-Comprimento: ${Number(f.comprimento)}<br>
-Material: ${f.material}<br>
-Quantidade: ${f.quantidade}<br>
-Alerta: ${f.nivel_alerta}
-    </div>
-`;
+    if (!quebras || quebras.length === 0) {
+        lista.innerHTML = `<div class="item">Nenhuma quebra registrada.</div>`;
+        return;
+    }
+
+    const grupos = {};
+
+    quebras.forEach(q => {
+        const mes = obterChaveMes(q.data_quebra);
+
+        if (!grupos[mes]) {
+            grupos[mes] = [];
+        }
+
+        grupos[mes].push(q);
+    });
+
+    Object.keys(grupos).forEach(mes => {
+        let html = `
+            <div class="mes-historico">
+                <h3>${mes}</h3>
+        `;
+
+        grupos[mes].forEach(q => {
+            html += `
+                <div class="historico-item">
+                    <strong>${q.tipo} Ø${formatarMedida(q.diametro)} mm</strong><br>
+                    Comprimento: ${formatarMedida(q.comprimento)} mm<br>
+                    Material: ${q.material}<br>
+                    Quantidade quebrada: ${q.quantidade} un.<br>
+                    Data: ${formatarData(q.data_quebra)}
+                </div>
+            `;
+        });
+
+        html += `</div>`;
+
+        lista.innerHTML += html;
     });
 }
 
+/* USUÁRIOS */
+
 async function listarUsuarios() {
     const resposta = await fetch(`${API}/usuarios`, {
-        headers: {
-            Authorization: `Bearer ${token}`
-        }
+        headers: headersAuth()
     });
 
     const usuarios = await resposta.json();
@@ -518,7 +1041,7 @@ async function listarUsuarios() {
                     Editar
                 </button>
 
-                <button onclick="excluirUsuario(${usuario.id})">
+                <button class="btn-danger" onclick="excluirUsuario(${usuario.id})">
                     Excluir
                 </button>
             </div>
@@ -534,10 +1057,7 @@ async function cadastrarUsuario() {
 
     const resposta = await fetch(`${API}/usuarios`, {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`
-        },
+        headers: headersJsonAuth(),
         body: JSON.stringify({
             nome,
             email,
@@ -570,9 +1090,7 @@ async function buscarUsuarioPorId() {
     }
 
     const resposta = await fetch(`${API}/usuarios/${id}`, {
-        headers: {
-            Authorization: `Bearer ${token}`
-        }
+        headers: headersAuth()
     });
 
     const usuario = await resposta.json();
@@ -601,10 +1119,7 @@ async function atualizarUsuario() {
 
     const resposta = await fetch(`${API}/usuarios/${id}`, {
         method: 'PUT',
-        headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`
-        },
+        headers: headersJsonAuth(),
         body: JSON.stringify({
             nome,
             email,
@@ -627,9 +1142,7 @@ async function excluirUsuario(id) {
 
     const resposta = await fetch(`${API}/usuarios/${id}`, {
         method: 'DELETE',
-        headers: {
-            Authorization: `Bearer ${token}`
-        }
+        headers: headersAuth()
     });
 
     const dados = await resposta.json();

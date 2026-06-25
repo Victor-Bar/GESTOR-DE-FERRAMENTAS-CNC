@@ -18,6 +18,7 @@ exports.cadastrar = (
     comprimento,
     material,
     quantidade,
+    imagem_url,
     callback
 ) => {
     ferramentaModel.cadastrar(
@@ -26,6 +27,7 @@ exports.cadastrar = (
         comprimento,
         material,
         quantidade,
+        imagem_url,
         callback
     );
 };
@@ -36,6 +38,7 @@ exports.atualizar = (
     comprimento,
     material,
     quantidade,
+    imagem_url,
     id,
     callback
 ) => {
@@ -45,6 +48,7 @@ exports.atualizar = (
         comprimento,
         material,
         quantidade,
+        imagem_url,
         id,
         callback
     );
@@ -62,5 +66,6 @@ exports.registrarQuebra = (id, quantidade, callback) => {
     ferramentaModel.registrarQuebra(id, quantidade, callback);
 };
 
-/*vamos manter o services caso futuramente precisamos enserir 
-regras de negocio assim da para deixar mais organizado*/
+exports.listarQuebras = (callback) => {
+    ferramentaModel.listarQuebras(callback);
+};

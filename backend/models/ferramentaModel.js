@@ -35,13 +35,14 @@ exports.cadastrar = (
     comprimento,
     material,
     quantidade,
+    imagem_url,
     callback
 ) => {
 
     const sql = `
         INSERT INTO ferramentas
-        (tipo, diametro, comprimento, material, quantidade)
-        VALUES (?, ?, ?, ?, ?)
+        (tipo, diametro, comprimento, material, quantidade, imagem_url)
+        VALUES (?, ?, ?, ?, ?, ?)
     `;
 
     connection.query(
@@ -51,7 +52,8 @@ exports.cadastrar = (
             diametro,
             comprimento,
             material,
-            quantidade
+            quantidade,
+            imagem_url
         ],
         callback
     );
@@ -64,19 +66,28 @@ exports.atualizar = (
     comprimento,
     material,
     quantidade,
+    imagem_url,
     id,
     callback
 ) => {
 
     const sql = `
         UPDATE ferramentas
-        SET tipo = ?, diametro = ?, comprimento = ?, material = ?, quantidade = ?
+        SET tipo = ?, diametro = ?, comprimento = ?, material = ?, quantidade = ?, imagem_url = ?
         WHERE id = ?
     `;
 
     connection.query(
         sql,
-        [tipo, diametro, comprimento, material, quantidade, id],
+        [
+            tipo,
+            diametro,
+            comprimento,
+            material,
+            quantidade,
+            imagem_url,
+            id
+        ],
         callback
     );
 
@@ -111,5 +122,27 @@ exports.registrarQuebra = (id, quantidade, callback) => {
     `;
 
     connection.query(sql, [id, quantidade], callback);
+
+};
+
+exports.listarQuebras = (callback) => {
+
+    const sql = `
+        SELECT
+            fq.id,
+            fq.ferramenta_id,
+            f.tipo,
+            f.diametro,
+            f.comprimento,
+            f.material,
+            fq.quantidade,
+            fq.data_quebra
+        FROM ferramentas_quebradas fq
+        INNER JOIN ferramentas f
+            ON fq.ferramenta_id = f.id
+        ORDER BY fq.data_quebra DESC, fq.id DESC
+    `;
+
+    connection.query(sql, callback);
 
 };

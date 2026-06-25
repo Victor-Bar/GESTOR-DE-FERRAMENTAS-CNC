@@ -7,7 +7,11 @@ const { protegerRota } = require('../middleware/auth');
 const { apenasEngenheiroOuAdministrador} = require('../middleware/permissoes');
 const controller =require('../controllers/ferramentasController');
 
-
+router.get(
+    '/quebras',
+    protegerRota,
+    controller.listarQuebras
+);
 
 
 // LISTAR TODAS AS FERRAMENTAS
@@ -27,6 +31,7 @@ router.get(
     protegerRota,
     controller.alertas
 );
+
 
 
 // BUSCAR POR ID
@@ -78,5 +83,7 @@ router.post(
     protegerRota,
     controller.quebrar
 );
+
+
 
 module.exports = router;

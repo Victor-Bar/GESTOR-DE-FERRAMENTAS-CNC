@@ -1,5 +1,4 @@
 const ferramentasService = require('../services/ferramentasService');
-const connection = require('../database/connection');
 
 exports.listar = (req, res) => {
 
@@ -18,6 +17,7 @@ exports.listar = (req, res) => {
 };
 
 exports.alertas = (req, res) => {
+
     ferramentasService.buscarAlertas((erro, resultados) => {
 
         if (erro) {
@@ -42,6 +42,7 @@ exports.alertas = (req, res) => {
                 ...f,
                 nivel_alerta: nivel
             };
+
         });
 
         res.json({
@@ -57,7 +58,7 @@ exports.buscarPorId = (req, res) => {
 
     const id = req.params.id;
 
-   ferramentasService.buscarPorId(id, (erro, resultados) => {
+    ferramentasService.buscarPorId(id, (erro, resultados) => {
 
         if (erro) {
             return res.status(500).json({
@@ -74,16 +75,18 @@ exports.buscarPorId = (req, res) => {
         res.status(200).json(resultados[0]);
 
     });
-    };
+
+};
 
 exports.cadastrar = (req, res) => {
-/*pegando*/
+
     const {
         tipo,
         diametro,
         comprimento,
         material,
-        quantidade
+        quantidade,
+        imagem_url
     } = req.body;
 
     if (!tipo || !diametro || !comprimento || !material || !quantidade) {
@@ -91,16 +94,19 @@ exports.cadastrar = (req, res) => {
             erro: 'Preencha todos os campos'
         });
     }
-//*Envia os dados para o Service, que fará a comunicação com o Model*//
+
     ferramentasService.cadastrar(
         tipo,
         diametro,
         comprimento,
         material,
         quantidade,
+        imagem_url || null,
         (erro, resultado) => {
 
             if (erro) {
+                console.log(erro);
+
                 return res.status(500).json({
                     erro: 'Erro ao inserir ferramenta'
                 });
@@ -115,6 +121,7 @@ exports.cadastrar = (req, res) => {
     );
 
 };
+
 exports.atualizar = (req, res) => {
 
     const id = req.params.id;
@@ -124,7 +131,8 @@ exports.atualizar = (req, res) => {
         diametro,
         comprimento,
         material,
-        quantidade
+        quantidade,
+        imagem_url
     } = req.body;
 
     if (!id) {
@@ -139,10 +147,13 @@ exports.atualizar = (req, res) => {
         comprimento,
         material,
         quantidade,
+        imagem_url || null,
         id,
         (erro) => {
 
             if (erro) {
+                console.log(erro);
+
                 return res.status(500).json({
                     erro: 'Erro ao atualizar ferramenta'
                 });
@@ -156,6 +167,7 @@ exports.atualizar = (req, res) => {
     );
 
 };
+
 exports.excluir = (req, res) => {
 
     const id = req.params.id;
@@ -179,6 +191,7 @@ exports.excluir = (req, res) => {
     });
 
 };
+
 exports.quebrar = (req, res) => {
 
     const id = req.params.id;
@@ -240,6 +253,22 @@ exports.quebrar = (req, res) => {
             });
 
         });
+
+    });
+
+};
+
+exports.listarQuebras = (req, res) => {
+
+    ferramentasService.listarQuebras((erro, resultados) => {
+
+        if (erro) {
+            return res.status(500).json({
+                erro: 'Erro ao buscar histórico de quebras'
+            });
+        }
+
+        res.status(200).json(resultados);
 
     });
 

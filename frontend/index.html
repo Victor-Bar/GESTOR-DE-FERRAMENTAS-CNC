@@ -3,15 +3,22 @@
 <head>
   <meta charset="UTF-8">
   <title>Gestor CNC</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
   <div class="container">
 
-    <section id="loginBox" class="card">
+    <!-- LOGIN -->
+    <section id="loginBox" class="login-card">
+      <div class="login-logo">
+        <span>CNC</span>
+      </div>
+
       <h1>Gestor CNC</h1>
-      <h2>Login</h2>
+      <h2>Acesso ao sistema</h2>
 
       <input id="email" type="email" placeholder="E-mail">
       <input id="senha" type="password" placeholder="Senha">
@@ -21,123 +28,352 @@
       <p id="loginMsg"></p>
     </section>
 
-    <section id="sistemaBox" class="hidden">
+    <!-- SISTEMA -->
+    <section id="sistemaBox" class="hidden app-layout">
 
+      <!-- SIDEBAR -->
       <aside class="sidebar">
-        <h2>Gestor CNC</h2>
 
-        <button onclick="mostrarTela('telaDashboard')">Dashboard</button>
-        <button id="menuCadastro" onclick="mostrarTela('telaCadastro')">Cadastrar Ferramenta</button>
-        <button id="menuEditar" onclick="mostrarTela('telaEditar')">Editar / Excluir</button>
-        <button onclick="mostrarTela('telaQuebra')">Registrar Quebra</button>
-        <button onclick="mostrarTela('telaAlertas')">Alertas</button>
-        <button id="menuUsuarios" onclick="mostrarTela('telaUsuarios')">Usuários</button>
-        <button onclick="logout()">Sair</button>
+        <div class="sidebar-top">
+          <div class="brand">
+            <div class="brand-icon">CNC</div>
+            <div>
+              <h2>Gestor CNC</h2>
+              <p>Controle de ferramentas</p>
+            </div>
+          </div>
+
+          <nav class="menu">
+            <button onclick="mostrarTela('telaDashboard')">
+              <svg class="menu-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M4 13H10V20H4V13Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+                <path d="M14 4H20V20H14V4Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+                <path d="M4 4H10V9H4V4Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+              </svg>
+              <span>Dashboard</span>
+            </button>
+
+            <button onclick="mostrarTela('telaFerramentas')">
+              <svg class="menu-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M4 7H20" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                <path d="M4 12H20" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                <path d="M4 17H20" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                <path d="M8 5V19" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+              </svg>
+              <span>Lista Ferramentas</span>
+            </button>
+
+            <button onclick="mostrarTela('telaQuebra')">
+              <svg class="menu-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M14 4L20 10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                <path d="M11 7L17 13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                <path d="M5 19L13 11" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                <path d="M4 20L8 16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+              </svg>
+              <span>Registrar Quebra</span>
+            </button>
+
+            <button onclick="mostrarTela('telaAlertas')">
+              <svg class="menu-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M18 9A6 6 0 0 0 6 9C6 16 3 17 3 17H21C21 17 18 16 18 9Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+                <path d="M10 20H14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+              </svg>
+              <span>Alertas</span>
+            </button>
+
+            <button onclick="mostrarTela('telaHistoricoQuebras')">
+              <svg class="menu-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M12 8V12L15 14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                <path d="M3.5 12A8.5 8.5 0 1 0 6 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                <path d="M3 5V10H8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <span>Histórico de Quebras</span>
+            </button>
+
+            <button id="menuCadastro" onclick="mostrarTela('telaCadastro')">
+              <svg class="menu-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M12 5V19" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                <path d="M5 12H19" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                <path d="M4 4H20V20H4V4Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+              </svg>
+              <span>Cadastrar Ferramentas</span>
+            </button>
+
+            <button id="menuEditar" onclick="mostrarTela('telaEditar')">
+              <svg class="menu-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M4 20H8L18.5 9.5L14.5 5.5L4 16V20Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+                <path d="M13.5 6.5L17.5 10.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                <path d="M14 20H21" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+              </svg>
+              <span>Editar / Excluir</span>
+            </button>
+
+            <button id="menuUsuarios" onclick="mostrarTela('telaUsuarios')">
+              <svg class="menu-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M12 12A4 4 0 1 0 12 4A4 4 0 0 0 12 12Z" stroke="currentColor" stroke-width="1.8"/>
+                <path d="M4 20C4.8 16.8 7.8 15 12 15C16.2 15 19.2 16.8 20 20" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+              </svg>
+              <span>Usuários</span>
+            </button>
+          </nav>
+        </div>
+
+        <button class="btn-sair" onclick="logout()">Sair</button>
+
       </aside>
 
+      <!-- CONTEÚDO PRINCIPAL -->
       <main class="main">
 
-        <header>
+        <header class="topbar">
           <div>
-            <h1>Dashboard</h1>
-            <p id="usuarioInfo"></p>
+            <p class="page-label">Sistema de gerenciamento</p>
+            <h1 id="tituloPagina">Dashboard</h1>
+          </div>
+
+          <div class="user-box">
+            <span id="usuarioInfo"></span>
           </div>
         </header>
 
+        <!-- DASHBOARD -->
         <section id="telaDashboard" class="tela ativa">
 
-         <div class="card">
-    <h2>Alertas de Estoque</h2>
-    <div id="dashboardAlertas"></div>
-</div>
+          <div class="dashboard-hero">
+            <div>
+              <p class="section-label"></p>
+              <h2>Controle de ferramentas CNC</h2>
+              
+            </div>
+          </div>
 
-<div class="card">
-    <h2>Lista de Ferramentas</h2>
-</div>
+          <div class="stats-grid">
 
-<div class="card">
-    <h2>Fresas Topo</h2>
-    <div id="listaFresasTopo"></div>
-</div>
+            <div class="stat-card">
+              <p>Fresas Topo</p>
+              <h3 id="totalFresasTopoDashboard">0</h3>
+              <span>Total em estoque</span>
+            </div>
 
-          <div class="card">
-            <h2>Fresas Esféricas</h2>
-            <div id="listaFresasEsfericas"></div>
+            <div class="stat-card">
+              <p>Fresas Esféricas</p>
+              <h3 id="totalFresasEsfericasDashboard">0</h3>
+              <span>Total em estoque</span>
+            </div>
+
+            <div class="stat-card alerta">
+              <p>Alertas</p>
+              <h3 id="totalAlertasDashboard">0</h3>
+              <span>Estoque baixo</span>
+            </div>
+
+            <div class="stat-card quebra">
+              <p>Ferramentas Quebradas</p>
+              <h3 id="totalQuebrasDashboard">0</h3>
+              <span>Total registrado</span>
+            </div>
+
+          </div>
+
+          <div class="dashboard-grid">
+
+            <div class="card">
+              <div class="card-header">
+                <div>
+                  <p class="section-label">Estoque</p>
+                  <h2>Alertas de Estoque</h2>
+                </div>
+              </div>
+
+              <div id="dashboardAlertas"></div>
+            </div>
+
+            <div class="card">
+              <div class="card-header">
+                <div>
+                  <p class="section-label">Quebras</p>
+                  <h2>Últimas Quebras</h2>
+                </div>
+              </div>
+
+              <div id="dashboardUltimasQuebras"></div>
+            </div>
+
           </div>
 
         </section>
 
+        <!-- FERRAMENTAS -->
+        <section id="telaFerramentas" class="tela">
+
+          <div class="page-title">
+            <p class="section-label">Estoque</p>
+            <h2>Lista de Ferramentas</h2>
+            
+          </div>
+
+          <div class="tools-columns">
+
+            <div class="card">
+              <div class="card-header">
+                <div>
+                  <p class="section-label">Categoria</p>
+                  <h2>Fresas Topo</h2>
+                </div>
+              </div>
+
+              <div id="listaFresasTopo"></div>
+            </div>
+
+            <div class="card">
+              <div class="card-header">
+                <div>
+                  <p class="section-label">Categoria</p>
+                  <h2>Fresas Esféricas</h2>
+                </div>
+              </div>
+
+              <div id="listaFresasEsfericas"></div>
+            </div>
+
+          </div>
+
+        </section>
+
+        <!-- CADASTRAR FERRAMENTA -->
         <section id="telaCadastro" class="tela">
 
-          <div id="areaCadastroFerramenta" class="card">
-            <h2>Cadastrar Ferramenta</h2>
+          <div id="areaCadastroFerramenta" class="card form-card cadastro-card">
+            <div class="card-header">
+              <div>
+                <p class="section-label">Cadastro</p>
+                <h2>Cadastrar Ferramenta</h2>
+              </div>
+            </div>
 
-            <select id="tipo">
-              <option value="">Selecione o tipo</option>
-              <option value="Topo">Topo</option>
-              <option value="Esferica">Esférica</option>
-            </select>
+            <div class="form-grid cadastro-grid">
+              <select id="tipo">
+                <option value="">Selecione o tipo</option>
+                <option value="Topo">Topo</option>
+                <option value="Esferica">Esférica</option>
+              </select>
 
-            <input id="diametro" type="number" placeholder="Diâmetro">
-            <input id="comprimento" type="number" placeholder="Comprimento">
+              <input id="diametro" type="number" placeholder="Diâmetro">
 
-            <select id="material">
-              <option value="">Selecione o material</option>
-              <option value="Aluminio">Alumínio</option>
-              <option value="Ferro">Ferro</option>
-              <option value="Aço">Aço</option>
-            </select>
+              <input id="comprimento" type="number" placeholder="Comprimento">
 
-            <input id="quantidade" type="number" placeholder="Quantidade">
+              <select id="material">
+                <option value="">Selecione o material</option>
+                <option value="Aluminio">Alumínio</option>
+                <option value="Ferro">Ferro</option>
+                <option value="Aço">Aço</option>
+              </select>
+
+              <input id="quantidade" type="number" placeholder="Quantidade">
+
+              <div class="foto-cadastro-area">
+                <button type="button" class="foto-cadastro-box" onclick="abrirInputImagemCadastro()">
+                  <span id="previewImagemCadastro">
+                    <svg class="upload-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                      <path d="M14 2H6C4.9 2 4 2.9 4 4V20C4 21.1 4.9 22 6 22H18C19.1 22 20 21.1 20 20V8L14 2Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+                      <path d="M14 2V8H20" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+                      <path d="M12 12V18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                      <path d="M9 15H15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                    </svg>
+                  </span>
+                </button>
+
+                <button type="button" id="btnRemoverImagemCadastro" class="btn-remover-imagem-cadastro hidden" onclick="removerImagemCadastro()">
+                  Remover imagem
+                </button>
+
+                <input id="imagemCadastroInput" class="input-foto-hidden" type="file" accept="image/*" onchange="selecionarImagemCadastro(event)">
+              </div>
+            </div>
 
             <button onclick="cadastrarFerramenta()">Cadastrar</button>
           </div>
 
         </section>
 
+        <!-- EDITAR / EXCLUIR -->
         <section id="telaEditar" class="tela">
 
-          <div id="areaEditarExcluirFerramenta" class="card">
-            <h2>Buscar / Atualizar / Excluir Ferramenta</h2>
+          <div class="editar-layout">
 
-            <select id="idFerramentaAcao">
-              <option value="">Selecione uma ferramenta</option>
-            </select>
+            <div id="areaEditarExcluirFerramenta" class="card form-card">
+              <div class="card-header">
+                <div>
+                  <p class="section-label">Gerenciamento</p>
+                  <h2>Buscar / Atualizar / Excluir Ferramenta</h2>
+                </div>
+              </div>
 
-            <button onclick="buscarFerramentaPorId()">Buscar</button>
-            <button onclick="excluirFerramenta()">Excluir</button>
+              <select id="idFerramentaAcao">
+                <option value="">Selecione uma ferramenta</option>
+              </select>
 
-            <hr>
+              <div class="actions-row">
+                <button onclick="buscarFerramentaPorId()">Buscar</button>
+                <button class="btn-danger" onclick="excluirFerramenta()">Excluir</button>
+              </div>
 
-            <select id="editTipo">
-              <option value="">Selecione o tipo</option>
-              <option value="Topo">Topo</option>
-              <option value="Esferica">Esférica</option>
-            </select>
+              <hr>
 
-            <input id="editDiametro" type="number" placeholder="Diâmetro">
-            <input id="editComprimento" type="number" placeholder="Comprimento">
+              <div class="form-grid">
+                <select id="editTipo">
+                  <option value="">Selecione o tipo</option>
+                  <option value="Topo">Topo</option>
+                  <option value="Esferica">Esférica</option>
+                </select>
 
-            <select id="editMaterial">
-              <option value="">Selecione o material</option>
-              <option value="Aluminio">Alumínio</option>
-              <option value="Ferro">Ferro</option>
-              <option value="Aço">Aço</option>
-            </select>
+                <input id="editDiametro" type="number" placeholder="Diâmetro">
+                <input id="editComprimento" type="number" placeholder="Comprimento">
 
-            <input id="editQuantidade" type="number" placeholder="Quantidade">
+                <select id="editMaterial">
+                  <option value="">Selecione o material</option>
+                  <option value="Aluminio">Alumínio</option>
+                  <option value="Ferro">Ferro</option>
+                  <option value="Aço">Aço</option>
+                </select>
 
-            <button onclick="atualizarFerramenta()">Atualizar Ferramenta</button>
+                <input id="editQuantidade" type="number" placeholder="Quantidade">
+              </div>
 
-            <div id="resultadoBusca"></div>
+              <button onclick="atualizarFerramenta()">Atualizar Ferramenta</button>
+
+              <div id="resultadoBusca"></div>
+            </div>
+
+            <div class="card preview-imagem-card">
+              <div class="card-header">
+                <div>
+                  <p class="section-label">Imagem</p>
+                  <h2>Imagem da Ferramenta</h2>
+                </div>
+              </div>
+
+              <div id="previewImagemEditar" class="preview-imagem-wrapper">
+                <div class="preview-imagem-vazio">
+                  Selecione uma ferramenta e clique em buscar.
+                </div>
+              </div>
+            </div>
+
           </div>
 
         </section>
 
+        <!-- REGISTRAR QUEBRA -->
         <section id="telaQuebra" class="tela">
 
-          <div class="card">
-            <h2>Registrar Ferramenta Quebrada</h2>
+          <div class="card form-card">
+            <div class="card-header">
+              <div>
+                <p class="section-label">Quebras</p>
+                <h2>Registrar Ferramenta Quebrada</h2>
+              </div>
+            </div>
 
             <select id="idQuebra">
               <option value="">Selecione uma ferramenta</option>
@@ -150,32 +386,66 @@
 
         </section>
 
+        <!-- HISTÓRICO DE QUEBRAS -->
+        <section id="telaHistoricoQuebras" class="tela">
+
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <p class="section-label">Histórico</p>
+                <h2>Histórico de Quebras</h2>
+              </div>
+
+              <button onclick="listarHistoricoQuebras()">Atualizar</button>
+            </div>
+
+            <div id="listaHistoricoQuebras"></div>
+          </div>
+
+        </section>
+
+        <!-- ALERTAS -->
         <section id="telaAlertas" class="tela">
 
           <div class="card">
-            <h2>Alertas de Estoque</h2>
-            <button onclick="listarAlertas()">Atualizar Alertas</button>
+            <div class="card-header">
+              <div>
+                <p class="section-label">Estoque</p>
+                <h2>Alertas de Estoque</h2>
+              </div>
+
+              <button onclick="listarAlertas()">Atualizar Alertas</button>
+            </div>
+
             <div id="listaAlertas"></div>
           </div>
 
         </section>
 
+        <!-- USUÁRIOS -->
         <section id="telaUsuarios" class="tela">
 
-          <div id="areaUsuarios" class="card hidden">
-            <h2>Gerenciamento de Usuários</h2>
+          <div id="areaUsuarios" class="card form-card hidden">
+            <div class="card-header">
+              <div>
+                <p class="section-label">Administração</p>
+                <h2>Gerenciamento de Usuários</h2>
+              </div>
+            </div>
 
             <h3>Cadastrar Usuário</h3>
 
-            <input id="usuarioNome" placeholder="Nome">
-            <input id="usuarioEmail" placeholder="E-mail">
-            <input id="usuarioSenha" placeholder="Senha">
+            <div class="form-grid">
+              <input id="usuarioNome" placeholder="Nome">
+              <input id="usuarioEmail" placeholder="E-mail">
+              <input id="usuarioSenha" placeholder="Senha">
 
-            <select id="usuarioTipo">
-              <option value="administrador">Administrador</option>
-              <option value="engenheiro">Engenheiro</option>
-              <option value="operador">Operador</option>
-            </select>
+              <select id="usuarioTipo">
+                <option value="administrador">Administrador</option>
+                <option value="engenheiro">Engenheiro</option>
+                <option value="operador">Operador</option>
+              </select>
+            </div>
 
             <button onclick="cadastrarUsuario()">Cadastrar Usuário</button>
 
@@ -183,19 +453,23 @@
 
             <h3>Atualizar Usuário</h3>
 
-            <input id="usuarioIdEditar" type="number" placeholder="ID do usuário">
-            <input id="usuarioNomeEditar" placeholder="Nome">
-            <input id="usuarioEmailEditar" placeholder="E-mail">
-            <input id="usuarioSenhaEditar" placeholder="Senha">
+            <div class="form-grid">
+              <input id="usuarioIdEditar" type="number" placeholder="ID do usuário">
+              <input id="usuarioNomeEditar" placeholder="Nome">
+              <input id="usuarioEmailEditar" placeholder="E-mail">
+              <input id="usuarioSenhaEditar" placeholder="Senha">
 
-            <select id="usuarioTipoEditar">
-              <option value="administrador">Administrador</option>
-              <option value="engenheiro">Engenheiro</option>
-              <option value="operador">Operador</option>
-            </select>
+              <select id="usuarioTipoEditar">
+                <option value="administrador">Administrador</option>
+                <option value="engenheiro">Engenheiro</option>
+                <option value="operador">Operador</option>
+              </select>
+            </div>
 
-            <button onclick="buscarUsuarioPorId()">Buscar Usuário</button>
-            <button onclick="atualizarUsuario()">Atualizar Usuário</button>
+            <div class="actions-row">
+              <button onclick="buscarUsuarioPorId()">Buscar Usuário</button>
+              <button onclick="atualizarUsuario()">Atualizar Usuário</button>
+            </div>
 
             <hr>
 
